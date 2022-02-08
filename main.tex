@@ -163,8 +163,16 @@
 %\gdutchapter{状态估计}{State estimation}
 
 \gdutchapter{传感器融合}{Sensor fusion}
-本章介绍了我们开发的一种适用于多旋翼飞行器的传感器融合算法，使用imu作为主要传感器。我们感兴趣的是在飞行器平台上运行的状态估计算法，这种应用场景对于传感器融合有不一样的要求。因此，我们针对这些系统需求处理传感器融合、异常处理等问题。
-我们注意到，这个课题已经有很好的研究成果\cite{mahony2008nonlinear,hua2010attitude,khosravian2016state}。
+本章介绍了我们开发的一种适用于多旋翼飞行器的传感器融合算法，使用imu作为主要传感器。我们感兴趣的是在飞行器平台上运行的状态估计算法，这种应用场景对于传感器融合有不一样的要求。因此，我们针对这些系统需求处理传感器融合、异常处理等问题。\par
+我们注意到，这个课题已经有很好的研究成果\cite{mahony2008nonlinear,hua2010attitude,khosravian2016state}。我们的工作与现有成果之间的主要区别在于，我们的系统整合了现有成果的方法，具有很强的鲁棒性。我们确保该系统能够在大震动、高机动环境中稳健运行，在这些环境中，依赖单一现有成果的算法是不可行的。我们给出了高机动运行环境下的实验结果，要求系统在一段较长的时间内无故障运行。\par
+在本章中，我们将重点讨论系统中使用的状态估计方法(\autoref{fig:stateestimation})。
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.7\textwidth]{state estimation.png}
+	\bicaption{状态估计框架图}{Diagram of state estimation}
+	\label{fig:stateestimation}
+\end{figure} 
 
 %\gdutsubsection{卡尔曼滤波}{Kalman filter}
 
