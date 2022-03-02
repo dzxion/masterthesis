@@ -158,7 +158,7 @@
 
 \gdutchapter{传感器融合}{Sensor fusion}
 本章介绍了我们开发的一种适用于多旋翼飞行器的传感器融合算法，使用IMU作为主要传感器。我们感兴趣的是在飞行器平台上运行的状态估计算法，这种应用场景对于传感器融合有不一样的要求。因此，我们针对这些系统需求处理传感器融合、异常处理等问题。\par
-我们注意到，这个课题已经有很好的研究成果\cite{mahony2008nonlinear,hua2010attitude,khosravian2016state}。我们的工作与现有成果之间的主要区别在于，我们的系统整合了现有成果的方法，具有很强的鲁棒性。我们确保该系统能够在大震动、高机动环境中稳健运行，在这些环境中，依赖单一现有成果的算法是不可行的。我们给出了高机动运行环境下的实验结果，要求系统在一段较长的时间内无故障运行。\par
+我们注意到，这个课题已经有很好的研究成果\cite{mahony2008nonlinear,hua2010attitude,khosravian2016state}。我们的工作与现有成果之间的主要区别在于，我们的系统整合了现有成果的方法，具有很强的鲁棒性。我们确保该系统能够在大震动、高机动环境、磁场干扰环境中稳健运行，在这些环境中，依赖单一现有成果的算法是不可行的。我们给出了各种环境下的实验结果，要求系统在一段较长的时间内无故障运行。\par
 
 \begin{figure}[htbp]
 	\centering
@@ -167,61 +167,96 @@
 	\label{fig:stateestimation}
 \end{figure} 
 
-在本章中，我们将重点讨论系统中使用的状态估计方法(\autoref{fig:stateestimation})。我们将介绍由这些方法支持的系统飞行测试结果。我们注意到，自主飞行需要仔细地集成其他重要模块，如规划、控制和地面站。然而，我们希望将这些模块的集成的讨论放到到第五章，因为它们中的大部分都是对其特定领域中现有结果的直接应用。这些模块作为通用模块，以支持整个系统的运行。
+在本章中，我们将重点讨论系统中使用的状态估计方法(\autoref{fig:stateestimation})。我们将介绍由这些方法支持的系统飞行测试结果。我们注意到，自主飞行需要仔细地集成其他重要模块，如控制、校准等。这些模块的讨论放到后面两章。这些模块作为通用模块，以支持整个系统的运行。
 
-\gdutsection{姿态估计}{Attitude estimation}
-我们工作的核心是一个可靠的估计模块，该模块使用GPS和低成本的IMU输出姿态。我们注意到，基于磁力计及GPS的偏航角估计较为特殊，因此，基于低成本传感器的特性，我们提出了一种解耦估计器设计。\par
-我们将世界坐标系和机体坐标系中的向量分别定义为$(\cdot)^w$和$(\cdot)^b$。我们感兴趣的是世界坐标系中飞行器的姿态，其定义为$\begin{bmatrix}
-	\phi^w & \theta^w & \psi^w
-\end{bmatrix}$。其中$\psi^w$、$\theta^w$和$\phi^w$是偏航角、俯仰角和横滚角，表示经过ZYX欧拉角转换后从机体坐标系到世界坐标系的旋转。因此，我们有旋转矩阵表示
+\gdutsection{状态估计}{State estimation}
+我们工作的核心是一个可靠的估计模块，该模块使用GPS、低成本的IMU和磁力计输出姿态、位置和速度。我们注意到，基于磁力计及GPS的偏航角估计较为特殊，因此，我们提出了一种解耦估计器设计。\par
+我们将世界坐标系记为$\left\{ W \right\}$，将机体坐标系记为$\left\{ B \right\}$，将世界坐标系和机体坐标系中的向量分别定义为$(\cdot)^w$和$(\cdot)^b$。我们感兴趣的是世界坐标系中飞行器的姿态、位置和速度，其定义为
+%\begin{equation}\label{eq:vector}
+%\begin{bmatrix}
+%	p^w_x & p^w_y & p^w_z & v^w_x & v^w_y & v^w_z & \phi^w & \theta^w & \psi^w
+%\end{bmatrix}
+%\end{equation}
+$[p^w_x , p^w_y , p^w_z , v^w_x , v^w_y , v^w_z , \phi^w , \theta^w , \psi^w]$。
+其中$p^w_x$、$p^w_y$和$p^w_z$是三维位置，$v^w_x$、$v^w_y$和$v^w_z$是三维速度，$\psi^w$、$\theta^w$和$\phi^w$是偏航角、俯仰角和横滚角，表示经过ZYX欧拉角转换后从机体坐标系到世界坐标系的旋转。因此，我们有旋转矩阵表示
 \begin{equation}\label{eq:rotationmatrix}
 	R_{b}^{w}=R(\psi^w)R(\theta^w)R(\phi^w)
 \end{equation}\par
-我们使用基于多传感器融合的姿态估计方法来估计三维姿态。一种带延时观测的显式互补滤波器(ECF)将IMU数据与GPS融合，以提供横滚角($\phi^w$)和俯仰角($\theta^w$)的估计。解耦估计器将陀螺仪数据、磁力计数据和GPS融合，以提供偏航角($\psi^w$)的估计。
+我们使用基于多传感器融合的状态估计方法来估计三维姿态、位置和速度。一种带延时观测的显式互补滤波器(ECF)将IMU数据与GPS融合，以提供横滚角($\phi^w$)和俯仰角($\theta^w$)的估计。解耦估计器将陀螺仪数据、磁力计数据和GPS融合，以提供偏航角($\psi^w$)的估计。一种带延时观测的三阶互补滤波器融合IMU和GPS数据输出三维位置和速度。
 
 \gdutsubsection{横滚角、俯仰角估计}{Roll and pitch estimation}
-直接安装在机体的IMU作为横滚角和俯仰角估计的主要信息来源。我们评估了几种基于IMU的姿态估计方法，如基于非线性观测器的方法\cite{mahony2008nonlinear}、基于扩展随机线性估计的方法\cite{sabatelli2012double}和基于粒子滤波的方法\cite{cheng2004particle}。然而，由于飞行器的机动性需要以200Hz以上的更新速率进行姿态估计，而我们有限的板载计算资源，因此我们选择了基于非线性观测器的算法，该算法可以产生鲁棒且低算力的实时姿态估计。我们利用GPS的速度观测\cite{hua2010attitude}来处理飞行器运动状态下的姿态估计问题。 
-
-\gdutsubsection{偏航角估计}{Yaw estimation}
-我们以四元数为状态的CF融合陀螺仪、磁力计和GPS进行偏航角估计。我们通过观测指向磁北的向量以及GPS速度都能得出世界坐标系的偏航角误差。如果磁力计得出的偏航角误差变化太大，通常是由于飞行器外部磁场变化导致的，我们放弃当前的磁力计测量数据，并推迟测量更新，直到获得稳定的测量。在磁场干扰环境下，考虑使用GPS速度数据进行融合。如果没有稳定的偏航角测量值可用，这些测量值增强了系统的鲁棒性。当磁力计数据不可用时，我们使用GPS速度进行短期测量更新，迫使飞行器在小范围进行运动。\par
-后面的小节中将介绍一种更有原则性的方法，将GPS测量值和磁力计测量结合起来，总体提供偏航估计。通过融合两种信息来解决磁场干扰引起的偏航误差修正问题。
-
-\gdutsection{基于ECF的传感器融合}{ECF-based sensor fusion}
-本节介绍了$SO(3)$上非线性互补滤波的一般框架。为了确保输出能满足反馈控制的高频、准确和无漂移的姿态估计，我们使用显式互补滤波器(ECF)融合并将姿态估计频率提高到800Hz。ECF结合10Hz的GPS数据、100Hz的磁力计数据、2000Hz的陀螺仪数据和800Hz的加速度数据，提供800Hz的姿态估计估计(\autoref{fig:stateestimation})。最终的估计输出平均延迟为0.01s，直接反馈到飞行器的反馈控制回路进行姿态控制。
-\par
-姿态估计的目标是为估计量$\hat{R}(t)\in SO(3)$提供一组动力学方程来使得误差旋转矩阵$\widetilde{R}(t)\rightarrow I_3$。真实系统的运动学方程为
-\begin{equation}\label{eq:kinematics}
-	\dot{R}=R\Omega_{\times}=(R\Omega)_{\times}R
-\end{equation}\par
-
-本文的ECF的状态向量定义为
-\begin{equation}\label{eq:statevector}
-	x_{t}=
-\begin{bmatrix}
-	q_{b}^{w} & b
-\end{bmatrix}^T
+直接安装在机体的惯性测量单元作为横滚角和俯仰角估计的主要信息来源。惯性测量单元（英文：Inertial measurement unit，简称IMU）是测量物体三轴姿态角（或角速率）以及加速度的装置。一般的，一个IMU内会装有三轴的陀螺仪和三个方向的加速度计，来测量物体在三维空间中的角速度和加速度，并以此解算出物体的姿态。\par
+陀螺仪测量的是$\left\{ B \right\}$相对于$\left\{ W \right\}$的角速度，投影在机体系$\left\{ B \right\}$。
+\begin{equation}\label{eq:gyromodel}
+	\Omega^y=\Omega+b+\mu
 \end{equation}
-其中，$q_{b}^{w}=\begin{bmatrix}
-	q_w & q_x & q_y & q_z
-\end{bmatrix}^T$是$t$时刻的姿态四元数，，$b=\begin{bmatrix}
- b_x & b_y & b_z
-\end{bmatrix}^T$是$t$时刻的陀螺仪零偏。注意，$q_{b}^{w}$表示的是$t$时刻机体坐标系相对于世界坐标系的姿态。$b$表示的是机体坐标系下的陀螺仪零偏。考虑\autoref{eq:kinematics}的旋转运动学方程，则对应的四元数运动学方程为
-\begin{equation}\label{eq:quatkinematics}
-	\dot{q}=\frac{1}{2}q\otimes \mathbf{p}(\Omega)
-\end{equation}\par
-基于IMU的姿态估计首先将加速度计测量值转换为世界坐标系，然后用于测量更新。测量值模型可以写成
-\begin{equation}\label{eq:measurementmodel}
+其中$\mu$表示加性测量噪声，$b$表示陀螺零偏。
+姿态估计的第一步是将陀螺仪测量的角速度积分成陀螺仪的姿态。在早期的惯性导航应用中，因为计算机计算能力有限，人们曾经使用双速度积分法：高速一阶积分和中速高阶积分，从而在保证积分精度的前提下降低计算量\cite{savage1998strapdown}。在现在IMU的低精度应用中，一般单片机的计算性能足以保证在IMU的测量带宽内使用最精确的积分方法，因此我们没有必要讨论双速度积分法。在本文中，我们不考虑地球自身的旋转和地球的曲率，因此只限于小范围内的IMU的应用。陀螺仪积分出的姿态短时间内是准确的，但长时间后因为漂移误差精度会大幅下降\cite{钱华明2010基于}。\par
+加速度计测量物体的比力，即去掉重力后的整体加速度或者单位质量上作用的非引力。
+\begin{equation}\label{eq:accmodel}
 	a=R^T(\dot{v}-g)+b_a+\mu_a
 \end{equation}
-其中$v$表示机体系相对于世界系的瞬时线性加速度，$\mu_a$为测量噪声。由于姿态测量模型是非线性的，不可以通过卡尔曼更新步骤进行测量更新。因此我们采用非线性滤波器的思路进行设计。\par
-本文使用的ECF后来发展成为基于ECF的多传感器融合框架，以一致的方式将来自磁力计和GPS的信息进行组合。
+其中$\mu_a$表示加性测量噪声，$b_a$表示加速度零偏，$\dot{v}$是世界系的加速度。
+三轴加速度计的原理能够用来测量角度。在没有外力作用的情况下，加速度计能够精确地测量俯仰角和滚转角，且没有累积误差。由于加速度计本身的特性，加速度计解算的姿态很灵敏，非常容易受到振动以及运动加速度的影响\cite{赵翔2012基于}。
 
-\gdutsection{位置速度估计}{Position and velocity esitimation}
-我们通过三阶互补滤波算法来解决位置速度估计问题。基于GPS和IMU，我们通过三阶互补滤波算法来修正位置速度误差。位置速度估计算法运行频率为800Hz。为了修正传感器延时引起的修正不一致，我们采用基于延时的算法\cite{khosravian2016state}。\par
-注意，如\autoref{fig:stateestimation}所示，位置速度估计模块和姿态估计模块运行在同一个的进程中，运行频率一样。这样，姿态、速度和位置的延迟能统一对齐。
+\gdutsubsection{偏航角估计}{Yaw estimation}
+磁力计提供周围环境磁场的测量值。
+\begin{equation}\label{eq:magmodel}
+	m=R^T m^w+B_m+\mu_m
+\end{equation}
+其中$m^w$为在世界系的地球磁场矢量，$B_m$为局部磁场干扰，$\mu_m$为测量噪声。对于磁力计的读数，$\mu_m$通常是相当小的，但是，局部磁场干扰$B_m$可能是非常大的，特别是如果传感器被放置在电机的电源线附近。多旋翼飞行器通用的无刷电机在运转的时候就会产生变化的磁场，和地磁场叠加之后，通过这个有偏差的地磁向量作为参考去计算所得到的偏航角是不准确的，目前没有很好的办法去解决磁场干扰问题\cite{梅玲玉2019基于}。\par
 
-\gdutsubsection{考虑延时的三阶互补滤波}{Third order complementary filter with sensor delay}
-根据IMU和GPS的数据，我们可以生成平滑准确的三维位置速度，用于飞行器控制。
+\gdutsubsection{位置速度估计}{Position and velocity esitimation}
+卫星导航系统（Global Navigation Satellite System, GNSS）是覆盖全球的自主地利空间定位的卫星系统，允许小巧的电子接收器确定它的所在位置（经度、纬度和高度），并且经由卫星广播沿着视线方向传送的时间信号精确到10米的范围内。在户外环境中，GPS通常用于提供位置、世界系的速度和航向角。GPS系统由一个24颗卫星组成的星座组成，这些卫星连续不断地围绕地球运行，高度为20180公里。GPS接收器的位置是通过观测卫星发送的信号的飞行时间来确定的，并被接收器探测到。如果接收机有准确的时间信息，则至少需要三个卫星信号来确定接收机的位置。然而，对于低成本的GPS接收器，也必须接收到定时信息，这需要至少4个卫星信号。存在各种各样的因素影响着GPS的估计。主要的误差来源包括卫星轨道数据不准确、卫星时钟不准确、信号通过电离层时的可变延迟、地球表面附近的天气状况以及来自附近建筑物和山脉的多径反射。GPS总体偏差约为5-10m。现代GPS接收机利用接收信号载波相位的多普勒频移来估计航向角和对地速度\cite{wendel2006integrated}。
+
+\gdutsection{基于ECF的传感器融合}{ECF-based sensor fusion}
+针对飞行器应用开发从业人员，我们希望设计一个模块化、容易扩展的传感器融合观测器。这意味着当我们需要增加或删除传感器时需要数学推导和编程的工作量应该是最小的。接下来我们将对目前流行算法的优缺点进行分析，以引出我们设计的融合框架。\par
+一个标准的方法是使用扩展的随机线性估计技术\cite{lefferts1982kalman,barshan1995inertial}。另一种方法是使用确定性互补滤波器和非线性观测器设计技术\cite{zimmermann1992high,baerveldt1997low,vik2001nonlinear}。对于我们考虑的低成本、轻量化系统，线性滤波技术已被证明在应用场景中鲁棒性不强\cite{roberts2003low}，而线性单输入单输出互补滤波器在实践中经常被使用\cite{saripalli2003tale,corke2004inertial}。前人关于非线性姿态观测者的研究有一个不足的地方是计算开销大，而且所构造姿态的误差较大。对于上述缺点，显式互补滤波器不需要对姿态进行在线代数重构。因此，该观测器非常适合在嵌入式硬件平台上实现。此外，对于不同的传感器数据的信任度可以在观测器响应中设置权重，这一特性允许开发人员根据传感器特定的噪声特性进行调整。最后，基于EKF的线性观测器方法在初始误差大时可能引起非常大的误差，而基于非线性控制方法的设计可以做到全局收敛。因此，我们采用基于ECF的非线性观测器的方法\cite{mahony2008nonlinear}。\par
+
+\gdutsubsection{基于ECF的标准实现}{Standard implementation based on ECF}
+姿态估计的目标是为估计量$\hat{R}(t)\in SO(3)$提供一组动力学方程来使得误差旋转矩阵$\widetilde{R}(t)\rightarrow I_3$。飞行器的姿态运动学方程为
+\begin{equation}\label{eq:kinematics}
+	\dot{R}=R\Omega_{\times}=(R\Omega)_{\times}R
+\end{equation}
+其中，$\Omega$是机体角速度。作者所提出的观测器方程直接作为一个运动学系统用于姿态估计。此观测器运动学包括基于测量的预测项和由误差导出的修正项。记$\hat{R}$表示对飞行器姿态$R$的估计。观测器的一般形式是
+\begin{equation}\label{eq:passivefilter}
+	\dot{\hat{R}}=\hat{R}(\Omega_{\times}+k_P \mathbb{P}_a(\widetilde{R}))
+\end{equation}
+其中，$k_P>0$。观测器框架如\autoref{fig:DiagramECF}所示。
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.7\textwidth]{Block-diagram-of-the-simplified-form-of-the-passive-complementary-filter.png}
+	\bicaption{显式互补滤波框架图}{Block diagram of explicit complementary filter}
+	\label{fig:DiagramECF}
+\end{figure}
+对于$\mathbb{P}_a(\widetilde{R})$，我们可以使用欧拉角相减，DCM或四元数相乘来获取姿态的误差，这样的方法都有一个缺点，那就是需要通过加速度计和磁力计的测量计算出一组姿态。虽然常用的方法比较成熟，但也有一些问题，比如欧拉角法存在奇异点（如在俯仰角90度时），DCM和四元数的TRIAD或QUEST等方法又需要额外的计算。ECF的突出贡献之一就是直接利用加速度计和磁力计的测量值，利用和惯性空间向量的叉乘，简单地就获得了姿态的误差。如下观测器是ECF的标准形式
+\begin{equation}\label{eq:Explicitfilter}
+	\begin{aligned}
+	\dot{\hat{R}}&=\hat{R}((\Omega^y - \hat{b})_{\times}+k_P (\omega_{mes})_{\times})\\
+	\dot{\hat{b}}&=-k_I \omega_{mes}\\
+	\omega_{mes} &\coloneqq \sum_{n=1}^{n} k_i v_i \times \hat{v}_i	
+	\end{aligned}
+\end{equation}
+其中$k_P$，$k_I$，$k_i$是任意非负的观测器增益。注意到姿态$\hat{R}$是整个观测器的输出。在文献\cite{mahony2008nonlinear}中对观测器(\autoref{eq:Explicitfilter})进行了广泛的研究，表明姿态和零偏能做到指数收敛(理论和实验)。该滤波器具有互补的特性，利用陀螺仪信号的高频部分和磁力计、加速度计的低频部分\cite{mahony2008nonlinear}。与这些信号相关联的截止频率由增益$k_P$，$k_I$，$k_i$决定。\par
+用于表示旋转的单位四元数在代码实现中具有较高的效率，是实现$SO(3)$群运算的常用方法。上述观测器的四元数表示如下
+\begin{equation}\label{eq:quatfilter}
+	\begin{aligned}
+	\dot{\hat{q}}&=\frac{1}{2} \hat{q} \otimes \mathbf{p}(\Omega_y - \hat{b} + k_P \omega_{mes})\\
+	\dot{\hat{b}}&=-k_I \omega_{mes}\\
+	\omega_{mes} &\coloneqq \sum_{n=1}^{n} k_i v_i \times \hat{v}_i	
+\end{aligned}
+\end{equation}\par
+如果飞行器配备了GPS系统，估计速度和位置是一个简单的过程。在这种情况下，位置运动学是线性的，可以使用线性滤波器。记$\hat{p}$表示位置的估计，$\hat{v}$表示速度的估计。给出了一个简单的线性滤波器
+\begin{equation}\label{eq:posfilter}
+	\begin{aligned}
+		\dot{\hat{p}}&=\hat{v}-k_x (\hat{p}-p_{GPS})\\
+		\dot{\hat{v}}&=\hat{R}^T a - g e_3 - k_v (\hat{p}-p_{GPS})\\	
+	\end{aligned}
+\end{equation}
+其中增益$k_x,k_v > 0$。只要姿态估计是准确的，这个滤波器具有很强的鲁棒性。此观测器可以很容易地加上加速度计的零偏估计。并且可以使用卡尔曼滤波去调节$k_x$和$k_v$。在实际应用中，对于微型飞行器系统，测量的噪声特性非常差，因此通常最好使用恒定增益滤波器，而不是引入附加的复杂性和潜在的不稳定性的Riccati方程与卡尔曼滤波器。
+
+\gdutsubsection{使用gps辅助的姿态观测器设计}{GPS-aided attitude observers}
+大多数现有的姿态观察器/滤波器都依赖于小加速度假设(即，$v<<g$)，因此重力方向测量可以近似于上一小节中讨论的加速度计测量。然而，对于许多飞行器都有高速运动的场景，会产生比较大的线性加速度，姿态估计器的输出可能会有较大的误差。对于较大的线性加速度，可以将GPS线速度的补充测量与加速度计的测量相结合来估计飞行器的加速度，从而提高姿态估计的精度。
 
 \gdutsection{实验结果}{Experimental results}
 本章给出了两个实验：(1)与信号良好的GPS/RTK的位置、速度及差分的加速度比较，研究了估计器的性能;(2)飞行器的飞行实验;第1章讨论了实验平台的结构。第四章将介绍控制方法。
