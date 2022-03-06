@@ -255,7 +255,7 @@ $[p^w_x , p^w_y , p^w_z , v^w_x , v^w_y , v^w_z , \phi^w , \theta^w , \psi^w]$�
 \end{equation}
 其中增益$k_x,k_v > 0$。只要姿态估计是准确的，这个滤波器具有很强的鲁棒性。此观测器可以很容易地加上加速度计的零偏估计。并且可以使用卡尔曼滤波去调节$k_x$和$k_v$。在实际应用中，对于微型飞行器系统，测量的噪声特性非常差，因此通常最好使用恒定增益滤波器，而不是引入附加的复杂性和潜在的不稳定性的Riccati方程与卡尔曼滤波器。
 
-\gdutsubsection{使用gps辅助的姿态观测器设计}{GPS-aided attitude observers}
+\gdutsubsection{使用GPS辅助的姿态观测器设计}{GPS-aided attitude observers}
 大多数现有的姿态观察器/滤波器都依赖于小加速度假设($\dot{v}\approx 0$)，因此重力方向测量可以近似于上一小节中讨论的加速度计测量。然而，对于许多飞行器都有高速运动的场景，会产生比较大的线性加速度，姿态估计器的输出可能会有较大的误差。对于较大的线性加速度，可以将GPS线速度的补充测量与加速度计的测量相结合来估计飞行器的加速度，从而提高姿态估计的精度。基于ECF的使用GPS辅助的姿态观测器被提出\cite{hua2010attitude}。值得注意的是，文中提出的观测器不能保证从磁场测量中对横滚角和俯仰角估计的解耦。\par
 我们使用直接补偿的方法。只要与飞行器惯性运动相关的加速度分量得到补偿，加速度计的数据也可以使用。最简单的方法是使用绝对测量信号GPS来估计飞行器的加速度
 \begin{equation}
@@ -309,6 +309,33 @@ q^{Y} =
 \begin{equation}
 	\hat{\psi} = k_Y (\psi_{mag} - \hat{\psi}) 	
 \end{equation}
+其中，$k_Y > 0$，$\hat{\psi}$为修正后的偏航角，$\psi_{mag}$为磁力计测量的偏航角。
+
+\gdutsubsection{多频率与延时的测量更新}{Multi-rate and multi-delay Measurement Update}
+当我们融合多个测量值时，传感器的采样频率是不统一的，也就是说，每种传感器测量值更新的频率都有可能不一样。此外，由于传感器内部处理的延时，所有的测量值都是滞后于当前的状态的。\par
+对于采样频率不同的问题，我们可以将更新和预测都放在预测的任务中处理，因为基于IMU的预测更新总是最快的，这样我们可以保证对每个用于修正的传感器数据都能及时使用。此外，我们通过将状态值、测量值存储在队列中来解决延时问题，队列的顶部对应于最旧的状态值。在我们的程序软件上，预先定义了最大允许的传感器延迟$t_d$为100ms。如果更新的测量值相对于当前状态(观测器输出的)的延时大于$t_d$，这个测量值就直接丢弃。
+对于姿态、位置、速度都有其对应的队列，状态队列长度是所有传感器的最大延时$t_d^{max}$，传感器可针对需求生成自己的队列(比如GPS)。在观测器中，我们总是利用最新的IMU测量值来向前更新状态。具体的处理机制如\autoref{fig:Delayedmeasurementupdate}，为了方便说明，我们将所有的状态都计为$x_i$，测量值都计为$z_i$。\par
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.7\textwidth]{Delayed and out-of-order measurement update.png}
+	\bicaption{延时更新处理机制}{Delayed measurement handling mechanism.}
+	\label{fig:Delayedmeasurementupdate}
+\end{figure} 
+$z_1$作为最旧的状态，首先输入到观测器上。$z_2$、$z_3$、$z_4$临时存储在队列中。根据传感器的延时$z_1$用于修正$x_2$的状态，然后向前更新历史状态。最新的状态$x_5$则通过最新的IMU数据进行预测更新。
+
+\gdutsubsection{我们的算法实现}{Implementation of our algorithm}
+本节我们给出改进后算法的具体实现(\autoref{fig:Flowchartoffusionalgorithm})。
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.6\textwidth]{屏幕截图 2022-03-06 210135.png}
+	\bicaption{融合算法流程图}{Flow chart of fusion algorithm}
+	\label{fig:Flowchartoffusionalgorithm}
+\end{figure} 
+首先要对传感器数据进行处理，对于陀螺仪来说，由于姿态是对角速度的积分运算关系，震动对积分后的结果影响不大。对于加速度计来说，某些构型的飞行器机身可产生10个重力加速度大小的震动，加速度计对震动非常敏感，飞行过程中姿态的真实信息被震动加速度淹没了。针对震动噪声的问题，一般的解决方案是对加速度的数据进行一个低截止频率的低通滤波。\par
+我们的算法首先判断是否有速度/位置观测，如果存在速度/位置观测，我们可以对加速度继续补偿，然后再修正姿态。\par
+如果速度/位置传感器更新了，我们就对速度/位置进行修正。然后根据加速度预测速度/位置。\par
+最后对角速度进行积分，用四元数微分方程预测更新姿态。
+
 \gdutsection{实验结果}{Experimental results}
 本章给出了两个实验：(1)与信号良好的GPS/RTK的位置、速度及差分的加速度比较，研究了估计器的性能;(2)飞行器的飞行实验;第1章讨论了实验平台的结构。第四章将介绍控制方法。
 
