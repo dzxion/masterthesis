@@ -60,24 +60,24 @@
     % hyperlink-color = {prl},
   },
   info = {
-    title           = {模板射流电解加工微沟槽关键技术研究},
-    title*          = {Investigation on masked jet electrochemical machining of micro grooves},
-    date            = {2020/5/25},
-    author          = {张三},
-    author*         = {Zhang San},
-    supervisor      = {李四\qquad 教授},
-    supervisor*     = {Prof. Li Si},
-    supervisor-two  = {王五\qquad 教授},
-    supervisor-two* = {Prof. Wang Wu},
+    title           = {多旋翼飞行器导航与控制算法研究},
+    title*          = {Research on navigation and control algorithm of multi-rotor aircraft},
+    date            = {2022/5/25},
+    author          = {邓正雄},
+    author*         = {Deng Zhengxiong},
+    supervisor      = {鲁仁全\qquad 教授},
+    supervisor*     = {Prof. Lu Renquan},
+    supervisor-two  = {none},
+    supervisor-two* = {none},
     department      = {自动化学院},
     department*     = {Automation},
-    major           = {电子信息},
-    student-id      = {2112101234},
+    major           = {控制科学与工程},
+    student-id      = {2111904069},
     chairman        = {赵六\qquad 教授},
     degree          = {工程硕士},
     degree*         = {Master of Engineering},
-    keywords        = {电解加工, 微沟槽, 模板, 射流},
-    keywords*       = {electrochemical machining, micro grooves, mask, jet},
+    keywords        = {多旋翼, 状态估计, 控制, 校准},
+    keywords*       = {multi rotor, state estimation, control, calibration},
     secret-level    = {none},
   }
 }
@@ -86,11 +86,36 @@
 \begin{document}
 
 \begin{abstract}
-  \zhlipsum[1-4]
+  由于多旋翼飞行器具有体积小、机动性强、悬停能力强等优点，其在监视、搜索和救援等场景有很好的应用前景。
+  在这些场景中，飞行器必须能够自主飞行，以尽量减少操作员的工作量。
+  随着近年来机器人技术的快速发展，能够实现自主飞行的飞行器已经广泛应用于各种场景当中。
+  但是，在传感器受干扰、使用低成本传感器情况下进行自主飞行会带来一些具有挑战性的工程问题。
+  解决这些工程问题需要对估计、校准、控制等算法进行综合设计。
+  其中，状态估计是自主飞行的首要和最关键的组成部分。
+  本文提出了以状态估计为重点的方法和系统设计，使多旋翼飞行器能够在传感器信息受限及干扰情况下自主飞行。
+  首先，我们提出了预测-修正-延时融合框架，以处理多频率多延时的传感器系统。
+  然后，我们对每个传感器的特性进行研究，针对磁场干扰及运动加速度补偿进行优化处理，以提高系统的鲁棒性。
+  其次，我们进一步优化了IMU校准算法，提高了IMU本身输出数据的精度。
+  最后，我们整合了控制算法，形成一个完整的飞行控制系统。
+  本文提供了大量的实验结果。
+  最后，我们提出了未来的研究方向。
 \end{abstract}
 
 \begin{abstract*}
-  \lipsum[1-4]
+  Micro aerial vehicles (MAVs) are ideal platforms for surveillance and search and rescue due to their small size, superior mobility, and hover capability.
+  In such missions, it is essential that the MAV is capable of autonomous flight to minimize operator workload.
+  With the rapid development of robot technology in recent years, aircraft capable of autonomous flight has been widely used in various scenarios.
+  Autonomous navigation in sensor interference, the use of low-cost sensors gives rise to challenging engineering
+  problems.
+  We require an integrated approach to estimation, calibration, and control to solve these engineering problems.
+  Among these, state estimation is the first and most critical component for autonomous flight.   
+  In this thesis, we present methodologies and system designs, with a focus on state estimation, that enable a light-weight off-the-shelf quadrotor MAV to autonomously navigate in the case of sensor information limitation and interference.
+  We start by presenting a prediction-correction-delay fusion framework to deal with multi-frequency and multi-delay sensor systems.
+  We then investigate the characteristics of each sensor and optimize the magnetic field interference and motion acceleration compensation to improve robustness.
+  We further optimize the IMU calibration algorithm and improve the accuracy of IMU output data.
+  Finally, we integrated the control algorithm into a complete flight control system.  	
+  Extensive experimental results are presented throughout the thesis. 
+  We conclude by proposing future research opportunities.
 \end{abstract*}
 
 \begin{notation}
@@ -104,57 +129,56 @@
 
 \gdutchapter{绪论}{Introduction}
 
-\gdutsection{本课题研究背景及研究意义}{Background and significance of research}
-随着科学技术的进步，产品逐渐向精密化和高性能化发展，具有毫米及微米尺度
-微沟槽结构的金属零部件在国防军事、航空航天、新能源、新材料、生物医学、半导
-体器件等领域的高技术产品中扮演的角色愈加重要。
+\gdutsection{研究背景及意义}{Background and significance of research}
+由于多旋翼飞行器具有体积小、机动性强、悬停能力强等优点，其在监视、搜索和救援等场景有很好的应用前景。
+在这些场景中，飞行器必须能够自主飞行，以尽量减少操作员的工作量。
+随着近年来机器人技术的快速发展，能够实现自主飞行的飞行器已经广泛应用于各种场景当中，如航空摄影、交通运输和智能农业。
+除了上述应用场景外，在人员和地面机器人难以接近或危险复杂环境中，飞行器在监视、搜索和救援任务中具有巨大的潜力。
+在这样的环境中，飞行器作业的主要挑战是传感器干扰和传感器本身数据精度低。
+传感器干扰包括但不限于气压计干扰、磁场干扰、GPS信号异常。
+由于使用低成本的传感器，传感器本身的数据精度限制了导航系统的精度。
+到目前为止，研发一个多旋翼飞行器，并能够在这样的环境中快速自主飞行，仍然会带来挑战性的工程问题，需要对估计、校准、控制等算法进行综合设计。
+因此，本文将对状态估计、校准和控制这三个问题进行研究。
+其中，状态估计是自主飞行的首要和最关键的组成部分。
 
-\gdutsection{微沟槽电解加工国内外相关研究现状}{Analysis of the research status at home and abroad}
-\gdutsubsection{成型电极电解加工}{Shaped cathode electrochemical machining}
-采用与微沟槽结构形状对应的成型阴极，例如薄板阴极，片状阴极等，进行微沟
-槽电解加工，其特点是方便一次成型微沟槽形状。南京航空航天大学吕焱明等进行了
-大长宽比深窄槽电解加工阴极设计以及工艺试验研究\cite{chendengyuan2000guoshi}，如\autoref{fig:example} 所示，具体参考\autoref{sub-fig-1} 和\autoref{sub-fig-2}，再参考\autoref{eq:example}，再再参考\autoref{tab:example}。
-\begin{equation}\label{eq:example}
-  E = mc^2
-\end{equation}
+\gdutsection{国内外研究现状}{Analysis of the research status at home and abroad}
+近年来，人们对应用在多旋翼飞行器的导航与控制系统进行了广泛的研究。
+我们首先回顾了多旋翼飞行器发展过程中出现的一些研究问题。
+我们在本节回顾关于每个问题及其相关领域的文献。
+接下来我们对估计、校准、控制三个问题进行回顾。
 
-\begin{figure}[htbp]
-  \subfloat[贴有模板的金属喷嘴示意图]{\label{sub-fig-1}
-    \includegraphics[width=0.4\textwidth]{example-image.pdf}
-  }
-  \qquad
-  \subfloat[由点到线扫描加工原理图]{\label{sub-fig-2}
-    \includegraphics[width=0.4\textwidth]{example-image.pdf}
-  }
-  \bicaption{模板射流电解加工微沟槽原理图}{Principle of masked jet electrochemical machining of micro grooves}
-  \label{fig:example}
-\end{figure}
+\gdutsubsection{传感器融合}{Sensor fusion}
+估计一个刚体的状态(即位置和姿态)是机器人鲁棒和高性能控制的关键要求。
+机器人的状态估计是一个非线性的问题，使用的传感器通常包含了非高斯噪声\cite{baldwin2009inertial}。
+一个标准的方法是使用扩展的随机线性估计技术\cite{lefferts1982kalman,barshan1995inertial}。
+另一种方法是使用确定性互补滤波器和非线性观测器设计技术\cite{zimmermann1992high,baerveldt1997low,vik2001nonlinear}。
+在随机线性估计技术中，应用于姿态估计问题的主要算法是扩展卡尔曼滤波(EKF)型方法。
+粒子滤波器也被认为是处理非线性的一种方法\cite{cheng2004particle}。
+由于状态空间的非线性而遇到困难，EKF表现出非鲁棒性和不稳定性\cite{crassidis2007survey}。
+相反，非线性观测器利用基础几何来解释问题本质中的非线性。
+因此，非线性观测器相比于EKF鲁棒性更强，并具有可证明的几乎全局稳定的性质\cite{thienel2003coupled,mahony2008nonlinear,lageman2009gradient,hua2010attitude,vasconcelos2010nonlinear}。
+对于姿态问题，Mahony等人利用所有旋转的特殊正交群SO(3)的基本李群结构推导了一个互补非线性姿态观测器，并证明了误差系统的几乎全局稳定性\cite{mahony2008nonlinear}。
+磁场干扰会影响横滚角和俯仰角的估计。
+Hua等人考虑了输入信号的解耦，以确保滚转和俯仰估计不受磁场干扰的影响，这代表了显式互补滤波器标准实现的一个重要修改，以提高姿态估计的整体质量\cite{hua2011nonlinear}。
+大多数现有的姿态观测器/滤波器都依赖于小加速度假设(即$\dot{v}<<g$)，因此重力方向测量可以近似于加速度计测量。
+然而，对于许多垂直起降飞行器在快速运动中，飞行器的线性加速度通常是较大的，可能会在姿态估计上产生很大的误差。
+对于较大的线性加速度，可以将GPS线速度的测量值与加速度计的测量值相结合来估计飞行器的加速度，从而提高姿态估计的精度。
+Hua等人提出了GPS辅助姿态观测器\cite{hua2010attitude}。
+以上提到的所有的观测器设计方法都要求对系统的当前输出和输入进行无延迟测量。
+然而，在许多实际场景中，系统输出的测量值具有延时(与系统的理想输出比较)，而系统输入的测量值可以看作没有延时。
+例如，GPS提供的线速度(输出)测量值通常相对于飞行器的实际速度有延时的。
+由于各种环境影响和传感器内部处理的延时，延时可以是几百毫秒(甚至半秒)\cite{kingston2004real}。
+相比之下，IMU提供的机体角速度和线加速度的测量值几乎是瞬时的。
+众所周知，测量延时会对观测器或滤波器的稳定性和鲁棒性产生负面影响，并降低其性能\cite{battilotti2015nonlinear}。
+在估计问题中，解决传感器延时问题的经典方法是修改其修正项，使每个延时测量值与相应的后向时移估计值进行比较。
+Khosravian等人提出了一种级联观察器-预测器方法来处理李群SO(3)上姿态估计的传感器延时问题\cite{khosravian2016state}。
+作者利用李群SO(3)的特定代数结构，证明了误差系统的指数收敛性。
+继Mahony在SO(3)上的工作之后，Baldwin等人提出了直接在SE(3)上使用全状态反馈和已知特征测量的互补观测器\cite{baldwin2007complementary}。
+据作者所知，针对多频率多延时的传感器系统以及传感器异常处理，目前的方法不能很好地解决鲁棒性和安全性问题。
 
-\begin{table}
-  \bicaption{DMC5400A 运动控制卡主要技术指标}{DMC5400A main specifications}
-  \label{tab:example}
-  \begin{tabular}{cc}
-    \toprule
-    控制卡技术指标              & 具体参数                      \\
-    \midrule
-    控制电机的脉冲信号频率范围  & $\SI{1}{Hz}\sim\SI{2}{MHz}$ \\
-    控制电机的脉冲信号频率精度  & \SI{0.0625}{Hz}              \\
-    脉冲信号输出最大电流        & \SI{20}{mA}                  \\
-    脉冲信号长度                & 28 位有符号                   \\
-    直线插补精度                & $\pm \SI{0.8}{pulse}$        \\
-    圆弧插补精度                & $\pm \SI{1.5}{pulse}$        \\
-    支持的插补坐标系个数        & 2                             \\
-    \bottomrule
-  \end{tabular}
-\end{table}
+\gdutsubsection{传感器校准}{Sensor calibration}
 
-
-\subsubsection{微沟槽电解加工国内外相关研究现状}
-测试 test。
-\paragraph{测试 test。}
-测试 test。
-\subparagraph{测试 test。}
-测试 test\cite{woerdelun2012jingji}。
+\gdutsubsection{控制}{Control}
 
 \gdutchapter{传感器融合}{Sensor fusion}
 本章介绍了我们开发的一种适用于多旋翼飞行器的传感器融合算法，使用IMU作为主要传感器。我们感兴趣的是在飞行器平台上运行的状态估计算法，这种应用场景对于传感器融合有不一样的要求。因此，我们针对这些系统需求处理传感器融合、异常处理等问题。
@@ -318,7 +342,7 @@ q^{Y} =
 \end{equation}
 偏航修正方式可以按照线性互补的方法进行修正:
 \begin{equation}
-	\hat{\psi} = k_Y (\psi_{mag} - \hat{\psi}) 	
+	\hat{\psi} = k_y (\psi_{mag} - \hat{\psi}) 	
 \end{equation}
 其中，$k_Y > 0$，$\hat{\psi}$为修正后的偏航角，$\psi_{mag}$为磁力计测量的偏航角。
 
@@ -349,26 +373,70 @@ $z_1$作为最旧的状态，首先输入到观测器上。$z_2$、$z_3$、$z_4$
 	\label{fig:Flowchartoffusionalgorithm}
 \end{figure}
 
-由于陀螺仪的采样频率和加速度计的采样频率不一致，我们将陀螺仪积分放在单独一个任务里面，只要陀螺仪数据更新，我们就根据四元数微分方程使用角速度数据进行积分。
+由于陀螺仪的采样频率和加速度计的采样频率不一致，我们将姿态预测和姿态修正分离，只要陀螺仪数据更新，我们就根据四元数微分方程使用角速度数据进行积分。
 \begin{equation}\label{eq:quatint}
-		\dot{q}=\frac{1}{2} q \otimes \mathbf{p}(\Omega_y)
+		\dot{q}(k)=\frac{1}{2} q \otimes \mathbf{p}(\Omega_y(k))
 \end{equation}
 
 对于加速度计来说，某些构型的飞行器机身可产生10个重力加速度大小的震动，加速度计对震动非常敏感，飞行过程中姿态的真实信息被震动加速度淹没了。针对震动噪声的问题，一般的解决方案是对加速度的数据进行一个低截止频率的低通滤波。
 
-上小节提到，我们使用观测器-预测器方法对历史状态处理，文\cite{khosravian2014velocity}在机体系下求出历史误差，没有历史状态进行修正。使用机体系下的误差对历史状态修正在实际应用中并不准确。原因是每个历史状态的机体系都是不一样的，不同坐标系的向量无法进行运算。我们使用在世界系求姿态误差，然后对历史状态进行修正。
+上小节提到，我们使用观测器-预测器方法对历史状态处理，文\cite{khosravian2014velocity}在机体系下求出历史误差，没有历史状态进行修正。使用机体系下的误差对历史状态修正在实际应用中并不准确。原因是每个历史状态的机体系都是不一样的，不同坐标系的向量无法进行运算。我们使用在世界系求姿态误差，然后对历史状态进行修正。此外，由GPS差分的运动加速度和IMU的更新频率不一致，我们用线性插值计算运动加速度作补偿。设计如下观测器：
+\begin{equation}\label{eq:myrpcorrection}
+	\begin{aligned}
+		\Delta a &= \frac{v - v_{last}}{\Delta t}\\
+		a_m (k-d) &= a_{mlast} + \frac{k-d}{k-k_{last}} \Delta a\\
+		a_{ref} (k-d) &= a_m (k-d) + g e_3\\
+		\sigma &= k_a \hat{R}(k-d) a(k-d) \times a_{ref}(k-d)\\
+		q_{correction}^{RP} &= \mathbf{p}(\sigma)\\
+		\hat{q}(k-n) &= q_{correction}^{RP} \otimes \hat{q}(k-n)
+	\end{aligned}
+\end{equation}
+其中，$a_m (t-d)$为$k-d$时刻通过插值计算的运动加速度，$\hat{R}(k-d)$为$k-d$时刻的姿态，$\sigma$为$k-d$时刻的修正量。我们使用$k-d$时刻的误差修正当前状态。
 
-如果速度/位置传感器更新了，我们就对速度/位置进行修正。然后根据加速度预测速度/位置。
+同理，根据我们在上一节对偏航解耦的分析，对磁力计/GPS的延时处理，设计如下观测器：
+\begin{equation}\label{eq:myyawcorrection}
+	\begin{aligned}
+		\sigma &= k_y (\psi_{mag/gps}(k-d) - \hat{\psi}(k-d)) \\
+		q_{correction}^{Y} &= \begin{bmatrix}
+			cos(\frac{\sigma}{2}) \\
+			0 \\
+			0 \\
+			sin(\frac{\sigma}{2})
+		\end{bmatrix}\\
+		\hat{q}(k-n) &= q_{correction}^{Y} \otimes \hat{q}(k-n)
+	\end{aligned}
+\end{equation}
+其中，$\psi_{mag/gps}(k-d)$为$k-d$时刻由磁力计/GPS就算的偏航角，$d$可以根据传感器不同更改。
 
-最后对角速度进行积分，用四元数微分方程预测更新姿态。
+和姿态估计类似，位置速度估计也可以分为预测和修正两部分，只要加速度数据更新，我们就使用加速度数据进行积分。
+\begin{equation}\label{eq:pvpredict}
+	\begin{aligned}
+		a^W(k) &= \hat{R}_B^W a^B(k) - g e_3\\
+		v(k) &= v(k-1) + a^W(k) \Delta t\\
+		p(k) &= p(k-1) + v(k) \Delta t
+	\end{aligned}
+\end{equation}
+其中$\Delta t$是步长。
+
+同理，仿照\autoref{eq:pvpredict}中的延时补偿方法，我们有位置速度观测器：
+\begin{equation}\label{eq:mypvcorrection}
+	\begin{aligned}
+		\hat{v}(k-n) &= \hat{v}(k-n) + k_v (v_m(k-d) - \hat{v}(k-d))\\
+		\hat{p}(k-n) &= \hat{p}(k-n) + k_p (p_m(k-d) - \hat{p}(k-d))
+	\end{aligned}
+\end{equation}
+取$n=0,1,...,d$修正$k-d$时刻到$k$时刻的历史状态。
 
 \gdutsection{实验结果}{Experimental results}
-本章给出了两个实验：(1)与信号良好的GPS/RTK的位置、速度及差分的加速度比较，研究了估计器的性能;(2)飞行器的飞行实验;第1章讨论了实验平台的结构。第四章将介绍控制方法。
+我们通过飞行实验验证了系统的鲁棒性。在实验中，飞行器都是通过使用其板载状态估计作为反馈进行自主控制。我们使用RTK对估计器进行定量评估。实验平台的介绍在第一章。控制方法的介绍在第四章。
 
 \gdutsubsection{评估估计器的性能}{Evaluating estimator performance}
-我们希望通过与真值对比以研究估计器的性能，真值是由厘米级精确度的GPS/RTK系统定义的。本小节的实验分为两部分。第一部分为飞行器飞行时，通过比较板载估计器输出与的GPS/RTK来评估估计的准确性。在本次实验中，估计器能很好地跟上GPS/RTK输出的真值。第二部分考察了使用来自估计器的姿态和速度反馈来维持姿态、速度和位置的反馈控制。
+我们希望通过与真值对比以研究估计器的性能，真值是由厘米级精确度的GPS/RTK系统定义的。在飞行器飞行时，本实验通过比较板载估计器输出与的GPS/RTK来评估估计的准确性。下面，我们给出RTK和板载估计的标准差。roll和pitch使用运动加速度评估，运动加速度的标准差为$\big\{ \sigma_{a_x},\sigma_{a_y} \big\}=\big\{ 22.61, 17.28 \big\}$(cm/s)。yaw的标准差为$\sigma_{\psi}=6.36$(deg)。位置的标准差为$\big\{ \sigma_{p_x},\sigma_{p_y},\sigma_{p_z} \big\}=\big\{ 3.21, 1.37, 1.44 \big\}$(cm)。速度的标准差为$\big\{ \sigma_{v_x},\sigma_{v_y},\sigma_{v_z} \big\}=\big\{ 3.37, 3.31, 4.26 \big\}$(cm/s)。
 
 \gdutsubsection{飞行器飞行实验}{UAV flying test}
+在本实验中，我们让飞行器沿约100米长的直线轨迹飞行，最大速度为5m/s。性能是根据来自RTK的真值进行评估的。估计的轨迹、位置、速度和姿态如所示。在图中可以看到较大且频繁的姿态变化。
+
+我们的目标是生成适合高速飞行的状态估计。我们可以看到，估计速度与真值的速度吻合得很好。
 
 \gdutsection{总结与讨论}{Summary and discussion}
 在本章中，我们展示了使用IMU作为主要传感器，融合其他传感器进行状态估计以实现飞行器的稳定飞行。关键技术是考虑了传感器延时，运动加速度补偿以及异常处理相关的算法。此外，我们将容易受到磁场干扰的偏航角和俯仰、横滚角解耦以保证系统的鲁棒性。本文提出的算法可以使飞行器保持稳定。
