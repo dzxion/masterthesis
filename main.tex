@@ -215,6 +215,17 @@ Tedaldi等人在多位置法的基础上进行改进，提出了一种鲁棒且�
 基于李群上的刚体动力学描述，Lee等人设计了一种应用在四旋翼飞行器的几何控制器，并证明了几乎全局稳定性\cite{lee2010geometric}。
 对于包含大姿态变化的运动，文献\cite{lee2010geometric}的控制器是更合适的选择。
 
+\gdutsection{实验平台概述}{Overview of Experimental Platforms}
+我们研究的一个关键部分是对提出的算法和系统进行实验验证。
+为此，我们开发了适合实验目的的飞行器平台。
+我们的飞行器平台(\autoref{fig:platform})都是使用现成的组件构建的。
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.7\textwidth]{platform.png}
+	\bicaption{实验平台}{Experimental platform}
+	\label{fig:platform}
+\end{figure} 
+
 \gdutchapter{传感器融合}{Sensor fusion}
 本章介绍了我们开发的一种适用于多旋翼飞行器的传感器融合算法，使用IMU作为主要传感器。我们感兴趣的是在飞行器平台上运行的状态估计算法，这种应用场景对于传感器融合有不一样的要求。因此，我们针对这些系统需求处理传感器融合、异常处理等问题。
 
