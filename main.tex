@@ -150,7 +150,7 @@
 \gdutsubsection{传感器融合}{Sensor fusion}
 估计一个刚体的状态(即位置和姿态)是机器人鲁棒和高性能控制的关键要求。
 机器人的状态估计是一个非线性的问题，使用的传感器通常包含了非高斯噪声\cite{baldwin2009inertial}。
-一个标准的方法是使用扩展的随机线性估计技术\cite{lefferts1982kalman,barshan1995inertial}。
+一种标准的方法是使用扩展的随机线性估计技术\cite{lefferts1982kalman,barshan1995inertial}。
 另一种方法是使用确定性互补滤波器和非线性观测器设计技术\cite{zimmermann1992high,baerveldt1997low,vik2001nonlinear}。
 在随机线性估计技术中，应用于姿态估计问题的主要算法是扩展卡尔曼滤波(EKF)型方法。
 粒子滤波器也被认为是处理非线性的一种方法\cite{cheng2004particle}。
@@ -206,6 +206,14 @@ Tedaldi等人在多位置法的基础上进行改进，提出了一种鲁棒且�
 我们在Tedaldi工作的基础上，对最优阈值的算法进行修改。
 
 \gdutsubsection{控制}{Control}
+在获得了飞行器的状态后，我们可以使用各种现有的控制策略使飞行器稳定飞行。
+线性控制器，如PID控制器或LQR控制器，被广泛应用于多旋翼飞行器中\cite{hoffmann2007quadrotor,castillo2004stabilization,nice2004design}。
+基于飞行器工作接近悬停状态的假设下，对于低速运行、加速度变化小的飞行器，可以使用线性控制器。
+针对四旋翼无人机在饱和位置下的线性化动力学问题，Guenard等人设计了一种非线性控制器\cite{guenard2005dynamic}。
+文献\cite{bouabdallah2005backstepping}中应用了反步和滑模技术。
+因为这些控制器是基于欧拉角设计的，它们在表示多旋翼飞行器复杂的旋转运动时表现出奇点，从而从根本上限制了它们跟踪轨迹的能力。
+基于李群上的刚体动力学描述，Lee等人设计了一种应用在四旋翼飞行器的几何控制器，并证明了几乎全局稳定性\cite{lee2010geometric}。
+对于包含大姿态变化的运动，文献\cite{lee2010geometric}的控制器是更合适的选择。
 
 \gdutchapter{传感器融合}{Sensor fusion}
 本章介绍了我们开发的一种适用于多旋翼飞行器的传感器融合算法，使用IMU作为主要传感器。我们感兴趣的是在飞行器平台上运行的状态估计算法，这种应用场景对于传感器融合有不一样的要求。因此，我们针对这些系统需求处理传感器融合、异常处理等问题。
