@@ -218,13 +218,43 @@ Tedaldi等人在多位置法的基础上进行改进，提出了一种鲁棒且�
 \gdutsection{实验平台概述}{Overview of Experimental Platforms}
 我们研究的一个关键部分是对提出的算法和系统进行实验验证。
 为此，我们开发了适合实验目的的飞行器平台。
-我们的飞行器平台(\autoref{fig:platform})都是使用现成的组件构建的。
+我们的飞行器平台(\autoref{fig:platform})是使用现成的组件构建的。
 \begin{figure}[htbp]
 	\centering
 	\includegraphics[width=0.7\textwidth]{platform.png}
 	\bicaption{实验平台}{Experimental platform}
 	\label{fig:platform}
 \end{figure} 
+实验平台上安装了一个飞控板(\autoref{fig:AutoPilotboard})。
+我们在这个飞控板上实现我们的算法。
+飞控板由IMU、磁力计、气压计和用户可编程的STM32微控制器组成。
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.7\textwidth]{acfly.jpg}
+	\bicaption{飞控板}{AutoPilot board}
+	\label{fig:AutoPilotboard}
+\end{figure}
+微控制器采用STM32H743VIT6(\autoref{fig:STM32H743VIT6})，主频高达480M，有16Kb的L1级缓存Cache，1M内存，2MFlash，支持硬件双精度浮点运算。
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.3\textwidth]{St-Semiconductor-Chips-Electronic-Component-Lqfp-100-Stm32h743vit6.jpg}
+	\bicaption{STM32H743VIT6}{STM32H743VIT6}
+	\label{fig:STM32H743VIT6}
+\end{figure}
+IMU芯片采用BMI088(\autoref{fig:BMI088})。
+BMI088是一款高性能六轴惯性测量单元，具有高振动稳定性，专为无人机和机器人应用而设计。
+BMI088具有出色的抗振性和抑制能力，可在较大的温度变化下保持稳定。
+BMI088的加速度计量程最大是24g，陀螺仪的最大量程是2000°/s。
+即使在大震动环境下也不会超量程。
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.5\textwidth]{屏幕截图 2022-03-30 151212.png}
+	\bicaption{BMI088}{BMI088}
+	\label{fig:BMI088}
+\end{figure}
+磁力计采用AK8975，气压计采用SPL06。
+对于位置传感器，我们使用ublox的GPS模块。
+本文中讨论的所有算法都是用C++实现，运行在上文提到的飞控板上。
 
 \gdutchapter{传感器融合}{Sensor fusion}
 本章介绍了我们开发的一种适用于多旋翼飞行器的传感器融合算法，使用IMU作为主要传感器。我们感兴趣的是在飞行器平台上运行的状态估计算法，这种应用场景对于传感器融合有不一样的要求。因此，我们针对这些系统需求处理传感器融合、异常处理等问题。
