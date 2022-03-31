@@ -95,7 +95,7 @@
   本文提出了以状态估计为重点的方法和系统设计，使多旋翼飞行器能够在传感器信息受限及干扰情况下自主飞行。
   首先，我们提出了预测-修正-延时融合框架，以处理多频率多延时的传感器系统。
   然后，我们对每个传感器的特性进行研究，针对磁场干扰及运动加速度补偿进行优化处理，以提高系统的鲁棒性。
-  其次，我们进一步优化了IMU校准算法，提高了IMU本身输出数据的精度。
+  其次，我们进一步优化了IMU校准算法，提出了新的最优阈值的算法，提高了IMU本身输出数据的精度。
   最后，我们整合了控制算法，形成一个完整的飞行控制系统。
   本文提供了大量的实验结果。
   最后，我们提出了未来的研究方向。
@@ -112,7 +112,7 @@
   In this thesis, we present methodologies and system designs, with a focus on state estimation, that enable a light-weight off-the-shelf quadrotor MAV to autonomously navigate in the case of sensor information limitation and interference.
   We start by presenting a prediction-correction-delay fusion framework to deal with multi-frequency and multi-delay sensor systems.
   We then investigate the characteristics of each sensor and optimize the magnetic field interference and motion acceleration compensation to improve robustness.
-  We further optimize the IMU calibration algorithm and improve the accuracy of IMU output data.
+  we further optimize the IMU calibration algorithm and propose a new optimal threshold algorithm to improve the accuracy of IMU output data.
   Finally, we integrated the control algorithm into a complete flight control system.  	
   Extensive experimental results are presented throughout the thesis. 
   We conclude by proposing future research opportunities.
@@ -234,6 +234,7 @@ Tedaldi等人在多位置法的基础上进行改进，提出了一种鲁棒且�
 	\bicaption{飞控板}{AutoPilot board}
 	\label{fig:AutoPilotboard}
 \end{figure}
+
 微控制器采用STM32H743VIT6(\autoref{fig:STM32H743VIT6})，主频高达480M，有16Kb的L1级缓存Cache，1M内存，2MFlash，支持硬件双精度浮点运算。
 \begin{figure}[htbp]
 	\centering
@@ -241,6 +242,7 @@ Tedaldi等人在多位置法的基础上进行改进，提出了一种鲁棒且�
 	\bicaption{STM32H743VIT6}{STM32H743VIT6}
 	\label{fig:STM32H743VIT6}
 \end{figure}
+
 IMU芯片采用BMI088(\autoref{fig:BMI088})。
 BMI088是一款高性能六轴惯性测量单元，具有高振动稳定性，专为无人机和机器人应用而设计。
 BMI088具有出色的抗振性和抑制能力，可在较大的温度变化下保持稳定。
@@ -252,32 +254,95 @@ BMI088的加速度计量程最大是24g，陀螺仪的最大量程是2000°/s。
 	\bicaption{BMI088}{BMI088}
 	\label{fig:BMI088}
 \end{figure}
+
 磁力计采用AK8975，气压计采用SPL06。
 对于位置传感器，我们使用ublox的GPS模块。
 本文中讨论的所有算法都是用C++实现，运行在上文提到的飞控板上。
 
-\gdutchapter{传感器融合}{Sensor fusion}
+\gdutsection{本文研究内容及安排}{Thesis contributions and overview}
+本文的研究工作在于多旋翼飞行器导航与控制系统相关算法的开发。
+首先，我们提出了预测-修正-延时融合框架，以处理多频率多延时的传感器系统。
+然后，我们对每个传感器的特性进行研究，针对磁场干扰及运动加速度补偿进行优化处理，以提高系统的鲁棒性。
+其次，我们进一步优化了IMU校准算法，提出了新的最优阈值的算法，提高了IMU本身输出数据的精度。
+最后，我们整合了控制算法，形成一个完整的飞行控制系统。
+论文由五个章节组成，各章节安排如下：
+
+第一章为绪论，介绍了本课题的研究背景与意义，介绍了多旋翼飞行器的导航与控制系统的几个关键问题，分别对融合、校准、控制的研究现状进行了详细介绍，并阐述了本文的主要贡献和论文的结构安排。
+
+第二章介绍了导航系统的开发，提出了预测-修正-延时融合框架，以处理多频率多延时的传感器系统。并且对每个传感器的特性进行研究，针对磁场干扰及运动加速度补偿进行优化处理，以提高系统的鲁棒性。
+
+第三章介绍了校准算法的设计，进一步优化了IMU校准算法，提出了新的最优阈值的算法，提高了IMU本身输出数据的精度。
+
+第四章介绍了控制系统的开发，整合了现有控制方法，以满足飞行器稳定飞行的需求，形成一个完整的飞行控制系统。
+
+第五章为总结与展望。最后对研究工作进行总结并提出了未来的研究方向。
+
+\gdutchapter{基于多频率和多延时测量的状态估计研究}{State estimation based on multi-frequency and multi-delay measurements}
 本章介绍了我们开发的一种适用于多旋翼飞行器的传感器融合算法，使用IMU作为主要传感器。我们感兴趣的是在飞行器平台上运行的状态估计算法，这种应用场景对于传感器融合有不一样的要求。因此，我们针对这些系统需求处理传感器融合、异常处理等问题。
 
 我们注意到，这个课题已经有很好的研究成果\cite{mahony2008nonlinear,hua2010attitude,khosravian2016state}。我们的工作与现有成果之间的主要区别在于，我们的系统整合了现有成果的方法，具有很强的鲁棒性。我们确保该系统能够在大震动、高机动环境、磁场干扰环境中稳健运行，在这些环境中，依赖单一现有成果的算法是不可行的。我们给出了各种环境下的实验结果，要求系统在一段较长的时间内无故障运行。
 \begin{figure}[htbp]
 	\centering
-	\includegraphics[width=0.7\textwidth]{state estimation.png}
+	\includegraphics[width=0.7\textwidth]{屏幕截图 2022-03-31 170912.png}
 	\bicaption{状态估计框架图}{Diagram of state estimation}
 	\label{fig:stateestimation}
 \end{figure} 
 
 在本章中，我们将重点讨论系统中使用的状态估计方法(\autoref{fig:stateestimation})。我们将介绍由这些方法支持的系统飞行测试结果。我们注意到，自主飞行需要仔细地集成其他重要模块，如控制、校准等。这些模块的讨论放到后面两章。这些模块作为通用模块，以支持整个系统的运行。
 
+\gdutsection{问题描述}{Problem formulation}
+状态估计的目标是输出机器人六自由度的状态。
+状态包括了三自由度的位置和三自由度的姿态。
+我们首先要将位置和姿态用数学语言描述出来。
+
+\gdutsubsection{坐标系定义}{Coordinate system definition}
+飞行器的位置、速度都可以抽象成三维向量，这就需要定义坐标系。
+一般我们会选择三个相互正交的三维向量来构成直角坐标系。
+我们首先定义两个坐标系，一个世界坐标系(inertial frame)，一个机体坐标系(body frame)。
+我们将世界坐标系记为W，将机体坐标系记为B。
+其中，我们认为W系是静止的参考坐标系，而B系是运动坐标系。
+如\autoref{fig:coordinatesystemdefinition}所示，我们定义W系原点在飞机初始点，为北-东-地坐标系，B系原点在无人机质心，x轴指向机头、y轴指向右侧，z轴指向下方。
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.7\textwidth]{屏幕截图 2022-03-31 222546.png}
+	\bicaption{坐标系定义}{Coordinate system definition}
+	\label{fig:coordinatesystemdefinition}
+\end{figure}
+这样，飞行器的位置向量，速度向量，加速度向量，角速度向量就都有了可以表示的坐标系。
+我们将世界坐标系和机体坐标系中的向量分别定义为为$(\cdot)^w$和$(\cdot)^b$。
+我们用$p^w$和$v^w$表示世界坐标系中飞行器的位置和速度。
+
+\gdutsubsection{姿态表示}{Attitude representation}
+姿态是描述两个坐标系之间相对关系。
+目前有四种流行的姿态表示法，分别是欧拉角、旋转矩阵、四元数和旋转矢量\cite{shuster1993survey}。
+
+我们可以将姿态表示为三个角度。
+如\autoref{fig:eulerangle}所示，机体坐标系与世界坐标系之间的夹角就是飞机的姿态角，又称欧拉角：
+\begin{itemize}
+	\item 俯仰角$\theta$：机体轴与地平面(水平面)之间的夹角，飞机抬头为正。
+	\item 偏航角$\psi$：机体轴在水平面上的投影与地轴之间的夹角，以机体右偏为正。
+	\item 横滚角$\phi$：飞机对称面绕机体轴转过的角度，右滚为正。
+\end{itemize}
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.7\textwidth]{屏幕截图 2022-03-31 231147.png}
+	\bicaption{欧拉角示意图}{Schematic diagram of euler angle}
+	\label{fig:eulerangle}
+\end{figure}
+三维旋转具有三个自由度。
+欧拉角是所有姿态的表示方法中需要用到参数最少的一种，也就是只用到三个参数。
+但是，当俯仰角$\theta \pm \frac{\pi}{2}$时，欧拉角存在自锁现象(gimbal lock)。
+在自锁点附近，横滚角$\phi$及航向角$\psi$的导数会趋向于无穷大，这也是欧拉角表示方法的奇异点。
+因此，我们不在算法中使用欧拉角进行运算。
+接下来我们引入旋转矩阵。
+
+%从另一个角度，姿态可以表示框架的基底
+%B使用坐标系A的坐标轴，坐标为x ab, y ab, z ab∈r3。
+
 \gdutsection{状态估计}{State estimation}
 我们工作的核心是一个可靠的估计模块，该模块使用GPS、低成本的IMU和磁力计输出姿态、位置和速度。我们注意到，基于磁力计及GPS的偏航角估计较为特殊，因此，我们提出了一种解耦估计器设计。
 
 我们将世界坐标系记为$\left\{ W \right\}$，将机体坐标系记为$\left\{ B \right\}$，将世界坐标系和机体坐标系中的向量分别定义为$(\cdot)^w$和$(\cdot)^b$。我们感兴趣的是世界坐标系中飞行器的姿态、位置和速度，其定义为
-%\begin{equation}\label{eq:vector}
-%\begin{bmatrix}
-%	p^w_x & p^w_y & p^w_z & v^w_x & v^w_y & v^w_z & \phi^w & \theta^w & \psi^w
-%\end{bmatrix}
-%\end{equation}
 $[p^w_x , p^w_y , p^w_z , v^w_x , v^w_y , v^w_z , \phi^w , \theta^w , \psi^w]$。
 其中$p^w_x$、$p^w_y$和$p^w_z$是三维位置，$v^w_x$、$v^w_y$和$v^w_z$是三维速度，$\psi^w$、$\theta^w$和$\phi^w$是偏航角、俯仰角和横滚角，表示经过ZYX欧拉角转换后从机体坐标系到世界坐标系的旋转。因此，我们有旋转矩阵表示
 \begin{equation}\label{eq:rotationmatrix}
@@ -517,7 +582,7 @@ $z_1$作为最旧的状态，首先输入到观测器上。$z_2$、$z_3$、$z_4$
 \gdutsection{总结与讨论}{Summary and discussion}
 在本章中，我们展示了使用IMU作为主要传感器，融合其他传感器进行状态估计以实现飞行器的稳定飞行。关键技术是考虑了传感器延时，运动加速度补偿以及异常处理相关的算法。此外，我们将容易受到磁场干扰的偏航角和俯仰、横滚角解耦以保证系统的鲁棒性。本文提出的算法可以使飞行器保持稳定。
 
-\gdutchapter{传感器校准}{Sensor calibration}
+\gdutchapter{基于多位置法的IMU校准算法研究}{Research on IMU calibration algorithm based on multi-position method}
 在本章中，我们研究如何使用较少的仪器来进行高精度的传感器校准以提供更好的传感器数据。一般来说，基于MEMS的传感器的精度都比较差，远远达不到高精度导航的要求。然而，开发基于MEMS的传感器的飞行器，要保证传感器数据精度是很困难的。在本章中，我们研究传感器校准算法，开发了一种不需要外部设备就可以进行较高精度的校准。我们详细介绍了基于优化的传感器校准算法，并将其与融合和控制方法(第4章)结合起来进行实验，以验证系统的性能。
 
 本系统的关键技术是一种传感器校准算法，能够无需外部设备的情况下进行校准。我们要求校准算法能够使用人手就能完成，无需外部设备，在尽量简单的校准流程下保证校准结果的准确性。
@@ -590,7 +655,7 @@ $z_1$作为最旧的状态，首先输入到观测器上。$z_2$、$z_3$、$z_4$
 \gdutsection{总结与讨论}{Summary and discussion}
 在本章中，我们提出了一种IMU校准算法，该方法能够在无需外部设备的情况下进行校准。我们对校准评估标准方法的进行优化。我们的方法能够使精度提高到xxx。
 
-\gdutchapter{控制}{Control methods}
+\gdutchapter{多旋翼飞行器的控制算法设计}{Design of control algorithm for multi-rotor aircraft}
 本章讨论如何调整控制方法，以配合飞行器稳定飞行的需要。我们介绍了保证状态估计和控制平滑的系统体系结构。
 
 \gdutsection{反馈控制}{Feedback control}
