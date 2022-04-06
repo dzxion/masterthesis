@@ -18,6 +18,8 @@
 % 宏包在这里加载
 \usepackage{siunitx}[=v2]
 \usepackage{zhlipsum,lipsum}
+\usepackage{algorithm}
+\usepackage{algorithmic}
 
 \gdutsetup{
   style = {
@@ -95,7 +97,7 @@
   本文提出了以状态估计为重点的方法和系统设计，使多旋翼飞行器能够在传感器信息受限及干扰情况下自主飞行。
   首先，我们提出了预测-修正-延时融合框架，以处理多频率多延时的传感器系统。
   然后，我们对每个传感器的特性进行研究，针对磁场干扰及运动加速度补偿进行优化处理，以提高系统的鲁棒性。
-  其次，我们进一步优化了IMU校准算法，提出了新的最优阈值的算法，提高了IMU本身输出数据的精度。
+  其次，我们进一步优化了IMU校准算法，提出了新的最优阈值的算法，改进了参数估计算法，提高了IMU本身输出数据的精度。
   最后，我们整合了控制算法，形成一个完整的飞行控制系统。
   本文提供了大量的实验结果。
   最后，我们提出了未来的研究方向。
@@ -203,7 +205,7 @@ Hwangbo等人提出了一种基于迭代矩阵分解的自校准技术\cite{hwan
 作者用重力作为加速度计的参考，用相机作为陀螺仪的参考。
 Tedaldi等人在多位置法的基础上进行改进，提出了一种鲁棒且易于实现的方法来校准IMU，无需任何外部设备\cite{tedaldi2014robust}。
 作者在优化算法内自动估计静态区间分割的阈值。
-我们在Tedaldi工作的基础上，对最优阈值的算法进行修改。
+我们在Tedaldi工作的基础上，对最优阈值的计算以及参数估计算法进行修改。
 
 \gdutsubsection{控制}{Control}
 在获得了飞行器的状态后，我们可以使用各种现有的控制策略使飞行器稳定飞行。
@@ -277,7 +279,7 @@ BMI088的加速度计量程最大是24g，陀螺仪的最大量程是2000°/s。
 
 第五章为总结与展望。最后对研究工作进行总结并提出了未来的研究方向。
 
-\gdutchapter{基于多频率和多延时测量的状态估计研究}{State estimation based on multi-frequency and multi-delay measurements}
+\gdutchapter{基于多频率和多延时测量的状态估计研究}{State estimation based on multi-rate and multi-delay measurements}
 本章介绍了我们开发的一种适用于多旋翼飞行器的传感器融合算法，使用IMU作为主要传感器。我们感兴趣的是在飞行器平台上运行的状态估计算法，这种应用场景对于传感器融合有不一样的要求。因此，我们针对这些系统需求处理传感器融合、异常处理等问题。
 
 我们注意到，这个课题已经有很好的研究成果\cite{mahony2008nonlinear,hua2010attitude,khosravian2016state}。我们的工作与现有成果之间的主要区别在于，我们的系统整合了现有成果的方法，具有很强的鲁棒性。我们确保该系统能够在大震动、高机动环境、磁场干扰环境中稳健运行，在这些环境中，依赖单一现有成果的算法是不可行的。我们给出了各种环境下的实验结果，要求系统在一段较长的时间内无故障运行。
@@ -302,16 +304,16 @@ BMI088的加速度计量程最大是24g，陀螺仪的最大量程是2000°/s。
 我们首先定义两个坐标系，一个世界坐标系(inertial frame)，一个机体坐标系(body frame)。
 我们将世界坐标系记为W，将机体坐标系记为B。
 其中，我们认为W系是静止的参考坐标系，而B系是运动坐标系。
-如\autoref{fig:coordinatesystemdefinition}所示，我们定义W系原点在飞机初始点，为北-东-地坐标系，B系原点在无人机质心，x轴指向机头、y轴指向右侧，z轴指向下方。
+如\autoref{fig:modelaerialrobot}所示，我们定义W系原点在飞机初始点，为北-东-地坐标系，B系原点在无人机质心，x轴指向机头、y轴指向右侧，z轴指向下方。s世界坐标系的三个坐标轴记为$\big\{ \vec{e}_1,\vec{e}_2,\vec{e}_3 \big\}$，机体坐标系的三个坐标轴记为$\big\{ \vec{b}_1,\vec{b}_2,\vec{b}_3 \big\}$。
 \begin{figure}[htbp]
 	\centering
 	\includegraphics[width=0.7\textwidth]{屏幕截图 2022-03-31 222546.png}
-	\bicaption{坐标系定义}{Coordinate system definition}
-	\label{fig:coordinatesystemdefinition}
+	\bicaption{飞行器模型}{The model of the aerial robot}
+	\label{fig:modelaerialrobot}
 \end{figure}
 这样，飞行器的位置向量，速度向量，加速度向量，角速度向量就都有了可以表示的坐标系。
 我们将世界坐标系和机体坐标系中的向量分别定义为为$(\cdot)^w$和$(\cdot)^b$。
-我们用$p^w$和$v^w$表示世界坐标系中飞行器的位置和速度。
+我们用$p^w$、$v^w$、$a^w$表示世界坐标系中飞行器的位置、速度、加速度。
 
 \gdutsubsection{姿态表示}{Attitude representation}
 姿态是描述两个坐标系之间相对关系。
@@ -420,102 +422,131 @@ $\eta_m$通常是比较小的。
 \end{equation}
 其中$z^w$是世界系的位置向量，$\eta$是测量噪声。
 
-\gdutsection{状态估计}{State estimation}
-我们工作的核心是一个可靠的估计模块，该模块使用GPS、低成本的IMU和磁力计输出姿态、位置和速度。我们注意到，基于磁力计及GPS的偏航角估计较为特殊，因此，我们提出了一种解耦估计器设计。
+\gdutsection{导航算法分析}{Navigation algorithm analysis}
+将状态估计问题用数学语言表述之后，我们将讨论具体的算法实现，分析各种算法的优劣以及目前存在的问题，以引出我们的设计。
 
-我们将世界坐标系记为$\left\{ W \right\}$，将机体坐标系记为$\left\{ B \right\}$，将世界坐标系和机体坐标系中的向量分别定义为$(\cdot)^w$和$(\cdot)^b$。我们感兴趣的是世界坐标系中飞行器的姿态、位置和速度，其定义为
-$[p^w_x , p^w_y , p^w_z , v^w_x , v^w_y , v^w_z , \phi^w , \theta^w , \psi^w]$。
-其中$p^w_x$、$p^w_y$和$p^w_z$是三维位置，$v^w_x$、$v^w_y$和$v^w_z$是三维速度，$\psi^w$、$\theta^w$和$\phi^w$是偏航角、俯仰角和横滚角，表示经过ZYX欧拉角转换后从机体坐标系到世界坐标系的旋转。因此，我们有旋转矩阵表示
-\begin{equation}\label{eq:rotationmatrix}
-	R_{b}^{w}=R(\psi^w)R(\theta^w)R(\phi^w)
-\end{equation}
+\gdutsubsection{矢量观测}{Vector observations}
+我们可以从位置传感器拿到位置信息，而姿态信息的计算是相对而言比较困难的。
+实际上，基于矢量观测的方法可以测量姿态。
+矢量观测是测量一些在世界坐标系内已知的矢量，这些矢量在机体坐标系中的测量值包含了IMU自身的姿态信息。
+最常用的例子包括用IMU中的加速度计测量重力方向，用磁力计测量磁场方向等等。
+将方向测量转化为姿态测量，这一问题在姿态估计的文献中被称为Wahba问题(Wahba's Problem)\cite{wahba1965least}。
+Shuster在1979年在文献\cite{shuster1981three}中提出的QUEST(QUaternion ESTimator)算法用于解决Wahba问题。
+这些算法需要在计算时间和精度之间进行权衡。
+例如，迭代的次数必须提前定义。
+此外，矢量观测的本质是代数解法，主要缺点是没有记忆特性，即过去测量的状态所包含的信息没有被保存下来。
 
-我们使用基于多传感器融合的状态估计方法来估计三维姿态、位置和速度。一种带延时观测的显式互补滤波器(ECF)将IMU数据与GPS融合，以提供横滚角($\phi^w$)和俯仰角($\theta^w$)的估计。解耦估计器将陀螺仪数据、磁力计数据和GPS融合，以提供偏航角($\psi^w$)的估计。一种带延时观测的三阶互补滤波器融合IMU和GPS数据输出三维位置和速度。
+\gdutsubsection{滤波器/观测器}{filter/observer}
+滤波器/观测器算法是作为替代代数方法的解决方案被提出的。
+因为当矢量测量值有噪声时，通常首选滤波算法。
+滤波器将矢量测量与运动学方程结合起来。
+在这类算法中，非线性观测器是一类有价值的方法。
+它们通常具有更强的稳定性和鲁棒性，非常容易调参和实现。
+Mahony等人提出的非线性显式互补滤波器是一个被广泛运用的方法\cite{mahony2008nonlinear}。
+后续有相当多的工作在非线性显式互补滤波器上的改进\cite{hua2010attitude,khosravian2016state}。
+但对于多频率多延时传感器系统，会带来许多问题，如传感器扰动。
+现有的方法难以处理这类传感器系统。
+接下来我们提出一种新的融合框架以处理多频率多延时传感器系统以及异常处理。
 
-\gdutsubsection{横滚角、俯仰角估计}{Roll and pitch estimation}
-直接安装在机体的惯性测量单元作为横滚角和俯仰角估计的主要信息来源。惯性测量单元（英文：Inertial measurement unit，简称IMU）是测量物体三轴姿态角（或角速率）以及加速度的装置。一般的，一个IMU内会装有三轴的陀螺仪和三个方向的加速度计，来测量物体在三维空间中的角速度和加速度，并以此解算出物体的姿态。
-
-姿态估计的第一步是将陀螺仪测量的角速度积分成陀螺仪的姿态。在早期的惯性导航应用中，因为计算机计算能力有限，人们曾经使用双速度积分法：高速一阶积分和中速高阶积分，从而在保证积分精度的前提下降低计算量\cite{savage1998strapdown}。在现在IMU的低精度应用中，一般单片机的计算性能足以保证在IMU的测量带宽内使用最精确的积分方法，因此我们没有必要讨论双速度积分法。在本文中，我们不考虑地球自身的旋转和地球的曲率，因此只限于小范围内的IMU的应用。陀螺仪积分出的姿态短时间内是准确的，但长时间后因为漂移误差精度会大幅下降\cite{钱华明2010基于}。
-
-三轴加速度计的原理能够用来测量角度。在没有外力作用的情况下，加速度计能够精确地测量俯仰角和滚转角，且没有累积误差。由于加速度计本身的特性，加速度计解算的姿态很灵敏，非常容易受到振动以及运动加速度的影响\cite{赵翔2012基于}。
-
-\gdutsubsection{偏航角估计}{Yaw estimation}
-磁力计提供周围环境磁场的测量值。
-其中$m^w$为在世界系的地球磁场矢量，$B_m$为局部磁场干扰，$\mu_m$为测量噪声。对于磁力计的读数，$\mu_m$通常是相当小的，但是，局部磁场干扰$B_m$可能是非常大的，特别是如果传感器被放置在电机的电源线附近。多旋翼飞行器通用的无刷电机在运转的时候就会产生变化的磁场，和地磁场叠加之后，通过这个有偏差的地磁向量作为参考去计算所得到的偏航角是不准确的，目前没有很好的办法去解决磁场干扰问题\cite{梅玲玉2019基于}。
-
-\gdutsubsection{位置速度估计}{Position and velocity esitimation}
-卫星导航系统（Global Navigation Satellite System, GNSS）是覆盖全球的自主地利空间定位的卫星系统，允许小巧的电子接收器确定它的所在位置（经度、纬度和高度），并且经由卫星广播沿着视线方向传送的时间信号精确到10米的范围内。在户外环境中，GPS通常用于提供位置、世界系的速度和航向角。GPS系统由一个24颗卫星组成的星座组成，这些卫星连续不断地围绕地球运行，高度为20180公里。GPS接收器的位置是通过观测卫星发送的信号的飞行时间来确定的，并被接收器探测到。如果接收机有准确的时间信息，则至少需要三个卫星信号来确定接收机的位置。然而，对于低成本的GPS接收器，也必须接收到定时信息，这需要至少4个卫星信号。存在各种各样的因素影响着GPS的估计。主要的误差来源包括卫星轨道数据不准确、卫星时钟不准确、信号通过电离层时的可变延迟、地球表面附近的天气状况以及来自附近建筑物和山脉的多径反射。GPS总体偏差约为5-10m。现代GPS接收机利用接收信号载波相位的多普勒频移来估计航向角和对地速度\cite{wendel2006integrated}。
-
-\gdutsection{基于ECF的传感器融合}{ECF-based sensor fusion}
-针对飞行器应用开发从业人员，我们希望设计一个模块化、容易扩展的传感器融合观测器。这意味着当我们需要增加或删除传感器时需要数学推导和编程的工作量应该是最小的。接下来我们将对目前流行算法的优缺点进行分析，以引出我们设计的融合框架。
-
-一个标准的方法是使用扩展的随机线性估计技术\cite{lefferts1982kalman,barshan1995inertial}。另一种方法是使用确定性互补滤波器和非线性观测器设计技术\cite{zimmermann1992high,baerveldt1997low,vik2001nonlinear}。对于我们考虑的低成本、轻量化系统，线性滤波技术已被证明在应用场景中鲁棒性不强\cite{roberts2003low}，而线性单输入单输出互补滤波器在实践中经常被使用\cite{saripalli2003tale,corke2004inertial}。前人关于非线性姿态观测者的研究有一个不足的地方是计算开销大，而且所构造姿态的误差较大。对于上述缺点，显式互补滤波器不需要对姿态进行在线代数重构。因此，该观测器非常适合在嵌入式硬件平台上实现。此外，对于不同的传感器数据的信任度可以在观测器响应中设置权重，这一特性允许开发人员根据传感器特定的噪声特性进行调整。最后，基于EKF的线性观测器方法在初始误差大时可能引起非常大的误差，而基于非线性控制方法的设计可以做到全局收敛。因此，我们采用基于ECF的非线性观测器的方法\cite{mahony2008nonlinear}。
-
-\gdutsubsection{基于ECF的标准实现}{Standard implementation based on ECF}
-姿态估计的目标是为估计量$\hat{R}(t)\in SO(3)$提供一组动力学方程来使得误差旋转矩阵$\widetilde{R}(t)\rightarrow I_3$。飞行器的姿态运动学方程为
-\begin{equation}\label{eq:kinematics}
-	\dot{R}=R\Omega_{\times}=(R\Omega)_{\times}R
-\end{equation}
-其中，$\Omega$是机体角速度。作者所提出的观测器方程直接作为一个运动学系统用于姿态估计。此观测器运动学包括基于测量的预测项和由误差导出的修正项。记$\hat{R}$表示对飞行器姿态$R$的估计。观测器的一般形式是
-\begin{equation}\label{eq:passivefilter}
-	\dot{\hat{R}}=\hat{R}(\Omega_{\times}+k_P \mathbb{P}_a(\widetilde{R}))
-\end{equation}
-其中，$k_P>0$。观测器框架如\autoref{fig:DiagramECF}所示。
+\gdutsection{基于多频率多延时的传感器融合}{multi-rate and multi-delay based sensor fusion}
+本节描述了一种融合来自多频率多延时传感器信息的方法，以提高系统在各种环境中的鲁棒性。
+这项工作的主要目标是开发一种模块化和可扩展的方法来集成来自多个传感器的测量值，为稳定飞行提供平滑准确的实时状态估计。
+我们第一个关键贡献，也是我们工作的核心，是一种基于\cite{mahony2008nonlinear}的原则性方法，通过预测-修正-延时框架来融合所有传感器的测量值。
+第二个重要的贡献是我们的观测器公式，它的更新步骤避免扰动对状态影响的耦合以及异常处理的困难。
+我们开发的算法流程如\autoref{fig:Flowchartoffusionalgorithm}。
 \begin{figure}[htbp]
 	\centering
-	\includegraphics[width=0.7\textwidth]{Block-diagram-of-the-simplified-form-of-the-passive-complementary-filter.png}
-	\bicaption{显式互补滤波框架图}{Block diagram of explicit complementary filter}
-	\label{fig:DiagramECF}
+	\includegraphics[width=0.6\textwidth]{屏幕截图 2022-03-06 210135.png}
+	\bicaption{融合算法流程图}{Flow chart of fusion algorithm}
+	\label{fig:Flowchartoffusionalgorithm}
 \end{figure}
-对于$\mathbb{P}_a(\widetilde{R})$，我们可以使用欧拉角相减，DCM或四元数相乘来获取姿态的误差，这样的方法都有一个缺点，那就是需要通过加速度计和磁力计的测量计算出一组姿态。虽然常用的方法比较成熟，但也有一些问题，比如欧拉角法存在奇异点（如在俯仰角90度时），DCM和四元数的TRIAD或QUEST等方法又需要额外的计算。ECF的突出贡献之一就是直接利用加速度计和磁力计的测量值，利用和惯性空间向量的叉乘，简单地就获得了姿态的误差。如下观测器是ECF的标准形式
-\begin{equation}\label{eq:Explicitfilter}
+
+\gdutsubsection{预测-修正-延时融合框架}{Prediction-correction-delay fusion framework}
+针对飞行器应用开发从业人员，我们希望设计一个模块化、容易扩展的传感器融合观测器。
+这意味着当我们需要增加或删除传感器时需要数学推导和编程的工作量应该是最小的。
+但是前人的工作只提供了一般的算法框架，或者是针对特定传感器的优化算法。
+很少工作能兼容多个传感器并且能随意增加和删除传感器。
+因此，从数据融合的角度，我们提出了预测-修正-延时融合框架，如\autoref{fig:Delayedmeasurementupdate}所示。
+
+当我们融合多个测量值时，传感器的采样频率是不统一的，也就是说，每种传感器测量值更新的频率都有可能不一样。
+此外，由于传感器内部处理的延时，所有的测量值都是滞后于当前的状态的。
+
+对于多采样频率问题，我们可以将更新和预测都放在预测的任务中处理，因为基于IMU的预测更新总是最快的，这样我们可以保证对每个用于修正的传感器数据都能及时使用。
+
+对于延时问题，我们可使用观测器-预测器方法\cite{khosravian2014velocity}。我们将状态值、测量值存储在队列中，队列的顶部对应于最旧的状态值。
+在我们的程序软件上，预先定义了最大允许的传感器延迟$t_d$为100ms。
+如果更新的测量值相对于当前状态(观测器输出的)的延时大于$t_d$，这个测量值就直接丢弃。
+对于姿态、位置、速度都有其对应的队列，状态队列长度是所有传感器的最大延时$t_d^{max}$，传感器可针对需求生成自己的队列(比如GPS)。
+在观测器中，我们总是利用最新的IMU测量值来向前更新状态。
+具体的处理机制如\autoref{fig:Delayedmeasurementupdate}，为了方便说明，我们将所有的状态都计为$x_i$，测量值都计为$z_i$。
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.7\textwidth]{Delayed and out-of-order measurement update.png}
+	\bicaption{预测-修正-延时融合框架}{Prediction-correction-delay fusion framework}
+	\label{fig:Delayedmeasurementupdate}
+\end{figure} 
+
+$z_1$作为最旧的状态，首先输入到观测器上。
+$z_2$、$z_3$、$z_4$临时存储在队列中。
+根据传感器的延时$z_1$用于修正$x_2$的状态，然后向前更新历史状态。
+最新的状态$x_5$则通过最新的IMU数据进行预测更新。
+
+这样，我们可以方便的增加/减少传感器，在程序中即增加/减少队列，同时可以为每个传感器设置延时，进行时间同步。
+
+\gdutsubsection{状态预测更新}{State propagation}
+由于陀螺仪的采样频率和加速度计的采样频率不一致，我们将姿态预测和姿态修正分离，只要陀螺仪数据更新，我们就根据四元数微分方程使用角速度数据进行积分。
+\begin{equation}\label{eq:quatint}
+	\dot{q}(k)=\frac{1}{2} q \otimes \mathbf{p}(\omega_y(k))
+\end{equation}
+
+只要加速度数据更新，我们就使用加速度数据进行积分。
+\begin{equation}\label{eq:pvpredict}
 	\begin{aligned}
-	\dot{\hat{R}}&=\hat{R}((\Omega^y - \hat{b})_{\times}+k_P (\omega_{mes})_{\times})\\
-	\dot{\hat{b}}&=-k_I \omega_{mes}\\
-	\omega_{mes} &\coloneqq \sum_{n=1}^{n} k_i v_i \times \hat{v}_i	
+		a^w(k) &= \hat{R}_b^w a^b(k) - g e_3\\
+		v(k) &= v(k-1) + a^w(k) \Delta t\\
+		p(k) &= p(k-1) + v(k) \Delta t
 	\end{aligned}
 \end{equation}
-其中$k_P$，$k_I$，$k_i$是任意非负的观测器增益。注意到姿态$\hat{R}$是整个观测器的输出。在文献\cite{mahony2008nonlinear}中对观测器(\autoref{eq:Explicitfilter})进行了广泛的研究，表明姿态和零偏能做到指数收敛(理论和实验)。该滤波器具有互补的特性，利用陀螺仪信号的高频部分和磁力计、加速度计的低频部分\cite{mahony2008nonlinear}。与这些信号相关联的截止频率由增益$k_P$，$k_I$，$k_i$决定。
+其中$\Delta t$是步长。
 
-用于表示旋转的单位四元数在代码实现中具有较高的效率，是实现$SO(3)$群运算的常用方法。上述观测器的四元数表示如下
-\begin{equation}\label{eq:quatfilter}
-	\begin{aligned}
-	\dot{\hat{q}}&=\frac{1}{2} \hat{q} \otimes \mathbf{p}(\Omega_y - \hat{b} + k_P \omega_{mes})\\
-	\dot{\hat{b}}&=-k_I \omega_{mes}\\
-	\omega_{mes} &\coloneqq \sum_{n=1}^{n} k_i v_i \times \hat{v}_i	
-\end{aligned}
-\end{equation}
+\gdutsubsection{运动加速度延时补偿修正}{Motion acceleration delay compensation correction}
+对于加速度计来说，某些构型的飞行器机身可产生10个重力加速度大小的震动，加速度计对震动非常敏感，飞行过程中姿态的真实信息被震动加速度淹没了。
+针对震动噪声的问题，一般的解决方案是对加速度的数据进行一个低截止频率的低通滤波。
 
-如果飞行器配备了GPS系统，估计速度和位置是一个简单的过程。在这种情况下，位置运动学是线性的，可以使用线性滤波器。记$\hat{p}$表示位置的估计，$\hat{v}$表示速度的估计。给出了一个简单的线性滤波器
-\begin{equation}\label{eq:posfilter}
+上小节提到，我们使用观测器-预测器方法对历史状态处理，文\cite{khosravian2014velocity}在机体系下求出历史误差，没有历史状态进行修正。
+使用机体系下的误差对历史状态修正在实际应用中并不准确。
+原因是每个历史状态的机体系都是不一样的，不同坐标系的向量无法进行运算。
+我们使用在世界系求姿态误差，然后对历史状态进行修正。
+此外，由GPS差分的运动加速度和IMU的更新频率不一致，我们用线性插值计算运动加速度作补偿。
+设计如下观测器：
+\begin{equation}\label{eq:myrpcorrection}
 	\begin{aligned}
-		\dot{\hat{p}}&=\hat{v}-k_x (\hat{p}-p_{GPS})\\
-		\dot{\hat{v}}&=\hat{R}^T a - g e_3 - k_v (\hat{p}-p_{GPS})\\	
+		\Delta a &= \frac{v - v_{last}}{\Delta t}\\
+		a_m (k-d) &= a_{mlast} + \frac{k-d}{k-k_{last}} \Delta a\\
+		a_{ref} (k-d) &= a_m (k-d) + g e_3\\
+		\sigma &= k_a \hat{R}(k-d) a(k-d) \times a_{ref}(k-d)\\
+		q_{correction}^{RP} &= \mathbf{p}(\sigma)\\
+		\hat{q}(k-n) &= q_{correction}^{RP} \otimes \hat{q}(k-n)
 	\end{aligned}
 \end{equation}
-其中增益$k_x,k_v > 0$。只要姿态估计是准确的，这个滤波器具有很强的鲁棒性。此观测器可以很容易地加上加速度计的零偏估计。并且可以使用卡尔曼滤波去调节$k_x$和$k_v$。在实际应用中，对于微型飞行器系统，测量的噪声特性非常差，因此通常最好使用恒定增益滤波器，而不是引入附加的复杂性和潜在的不稳定性的Riccati方程与卡尔曼滤波器。
+其中，$a_m (t-d)$为$k-d$时刻通过插值计算的运动加速度，$\hat{R}(k-d)$为$k-d$时刻的姿态，$\sigma$为$k-d$时刻的修正量。
+我们使用$k-d$时刻的误差修正当前状态。
 
-\gdutsubsection{使用GPS辅助的姿态观测器设计}{GPS-aided attitude observers}
-大多数现有的姿态观察器/滤波器都依赖于小加速度假设($\dot{v}\approx 0$)，因此重力方向测量可以近似于上一小节中讨论的加速度计测量。然而，对于许多飞行器都有高速运动的场景，会产生比较大的线性加速度，姿态估计器的输出可能会有较大的误差。对于较大的线性加速度，可以将GPS线速度的补充测量与加速度计的测量相结合来估计飞行器的加速度，从而提高姿态估计的精度。基于ECF的使用GPS辅助的姿态观测器被提出\cite{hua2010attitude}。值得注意的是，文中提出的观测器不能保证从磁场测量中对横滚角和俯仰角估计的解耦。
+\gdutsubsection{偏航解耦修正}{Yaw decoupling correction}
+磁场干扰和零偏会影响横滚角和俯仰角的估计。
+在实际应用中，特别是在使用电机作为执行器的小型飞行器中，较大的磁场干扰几乎是不可避免的，导致$m_B$和$R^T m_I$之间存在较大的时变误差。
+这不仅会导致偏航角的估计误差很大，而且还会导致横滚角和俯仰角估计产生误差。
+滚转角，俯仰角和偏航角估计的动力学方程是高度耦合的。
+这意味着偏航角的估计会较大地影响着横滚角和俯仰角的估计。
+在实际应用中，重力矢量和地球磁场矢量(即$e_3$和$m_I$)可能是“无法使用的”，因为两个向量在某些地区是非常接近的。
+在这种情况下，$\overline{m}_I$的z轴分量比x、y轴分量大很多。
+在高纬度地区，如法国$\overline{m}_{I,3}\approx 0.9$。因此，横滚角和俯仰角的动力学与偏航误差动力学是紧耦合的。
+另一方面，使用两个非常接近的向量$e_3$和$\overline{m}_I$也可能导致不可能构造出完整的姿态信息。
+很多文献考虑了对输入信号的解耦，以确保横滚角和俯仰角估计不受磁场干扰的影响，对显式互补滤波器标准实现进行修改，以提高姿态估计的整体质量。
+让我们讨论一下这些策略。
 
-我们使用直接补偿的方法。只要与飞行器惯性运动相关的加速度分量得到补偿，加速度计的数据也可以使用。最简单的方法是使用绝对测量信号GPS来估计飞行器的加速度
-\begin{equation}
-	a_{CTD}=a_{IMU}-\hat{R}^T \dot{v}_{GPS}
-\end{equation}
-其中$a_{CTD}$是修正后的加速度。在这种情况下，满足$a_{CTD} \approx R^T e_3$，$a_{CTD}$能提供准确的姿态信息。值得注意的是，在上文提出的互补滤波器中，只需要$a_{CTD}$的低频成分。因此，GPS速度的一阶导数$\dot{v}_{GPS}$中的噪声影响较小。
-
-\gdutsubsection{处理耦合问题}{Handling coupling issues}
-在补偿了运动加速度后，使得假设$a_{CTD} \approx R^T e_3$成立，在这种情况下我们依然可以使用显式互补滤波器的标准实现(\autoref{eq:Explicitfilter})，我们这里再将修正项单独拿出来讨论
-\begin{equation}
-\omega_{mes} \coloneqq k_1 u_B \times \hat{u}_B + k_2 m_B \times \hat{m}_B	
-\end{equation}
-其中，增益$k_{1,2}>0$，$u_B = a_B / g$，$u_I = e_3$，$\hat{u}_B = \hat{R}^T u_I$，$\overline{m}_B = m_B / \left| m_I \right|$，$\overline{m}_I = m_I / \left| m_I \right|$，$\hat{\overline{m}}_B = \hat{R}^T \overline{m}_I$。然而，研究人员已经认识到这个标准实现存在一些耦合问题，这些问题在文献\cite{hua2013implementation,hua2011nonlinear,martin2007invariant}中已经进行了深入的讨论。
-
-磁场干扰和零偏会影响横滚角和俯仰角的估计。在实际应用中，特别是在使用电机作为执行器的小型飞行器中，较大的磁场干扰几乎是不可避免的，导致$m_B$和$R^T m_I$之间存在较大的时变误差。这不仅会导致偏航角的估计误差很大，而且还会导致横滚角和俯仰角估计产生误差。
-滚转角，俯仰角和偏航角估计的动力学方程是高度耦合的。这意味着偏航角的估计会较大地影响着横滚角和俯仰角的估计。在实际应用中，重力矢量和地球磁场矢量(即$e_3$和$m_I$)可能是“无法使用的”，因为两个向量在某些地区是非常接近的。在这种情况下，$\overline{m}_I$的z轴分量比x、y轴分量大很多。在高纬度地区，如法国$\overline{m}_{I,3}\approx 0.9$。因此，横滚角和俯仰角的动力学与偏航误差动力学是紧耦合的。另一方面，使用两个非常接近的向量$e_3$和$\overline{m}_I$也可能导致不可能构造出完整的姿态信息。
-很多文献考虑了对输入信号的解耦，以确保横滚角和俯仰角估计不受磁场干扰的影响，对显式互补滤波器标准实现进行修改，以提高姿态估计的整体质量。让我们讨论一下这些策略。
-
-解耦的关键在于能否在计算上区分开来，由于我们将磁场向量转换到机体系上做修正，并且磁场向量本身包括x轴，y轴分量，这些分量会影响到roll、pitch分量。我们完全可以将roll、pitch分量的四元数和偏航分量的四元数分离开，当我们获取到磁力计数据时，我们只用磁力计修正偏航分量的四元数，然后生成一个完整的姿态。
+解耦的关键在于能否在计算上区分开来，由于我们将磁场向量转换到机体系上做修正，并且磁场向量本身包括x轴，y轴分量，这些分量会影响到roll、pitch分量。
+我们完全可以将roll、pitch分量的四元数和偏航分量的四元数分离开，当我们获取到磁力计数据时，我们只用磁力计修正偏航分量的四元数，然后生成一个完整的姿态。
 
 注意到在姿态修正过程中roll、pitch分量和yaw分量的明显区别，我们首先将姿态划分为roll、pitch分量四元数和yaw分量四元数：
 \[
@@ -539,7 +570,10 @@ q^{Y} =
 \begin{equation}\label{eq:decompose}
 	q = q^{Y} \otimes q^{RP}	
 \end{equation}
-由此我们可以看出，对完整的姿态四元数修正实际上是不必要的，偏航分量只对应于$q^{Y}$。我们可以通过磁力计/GPS计算的偏航角只修正$q^{Y}$，然后通过\autoref{eq:decompose}叠加到完整的姿态四元数上。由于roll、pitch分量只存在于四元数$q^{RP}$，因此避免了磁场干扰对roll、pitch的影响。由于欧拉角定义的旋转顺序是ZYX，偏航分量四元数可以写成:
+由此我们可以看出，对完整的姿态四元数修正实际上是不必要的，偏航分量只对应于$q^{Y}$。
+我们可以通过磁力计/GPS计算的偏航角只修正$q^{Y}$，然后通过\autoref{eq:decompose}叠加到完整的姿态四元数上。
+由于roll、pitch分量只存在于四元数$q^{RP}$，因此避免了磁场干扰对roll、pitch的影响。
+由于欧拉角定义的旋转顺序是ZYX，偏航分量四元数可以写成:
 \begin{equation}
 	q^{Y} = 
 	\begin{bmatrix}
@@ -555,54 +589,7 @@ q^{Y} =
 \end{equation}
 其中，$k_Y > 0$，$\hat{\psi}$为修正后的偏航角，$\psi_{mag}$为磁力计测量的偏航角。
 
-\gdutsubsection{多频率与延时的测量更新}{Multi-rate and multi-delay Measurement Update}
-当我们融合多个测量值时，传感器的采样频率是不统一的，也就是说，每种传感器测量值更新的频率都有可能不一样。此外，由于传感器内部处理的延时，所有的测量值都是滞后于当前的状态的。
-
-对于多采样频率问题，我们可以将更新和预测都放在预测的任务中处理，因为基于IMU的预测更新总是最快的，这样我们可以保证对每个用于修正的传感器数据都能及时使用。
-
-对于延时问题，我们可使用观测器-预测器方法\cite{khosravian2014velocity}。我们将状态值、测量值存储在队列中，队列的顶部对应于最旧的状态值。在我们的程序软件上，预先定义了最大允许的传感器延迟$t_d$为100ms。如果更新的测量值相对于当前状态(观测器输出的)的延时大于$t_d$，这个测量值就直接丢弃。
-对于姿态、位置、速度都有其对应的队列，状态队列长度是所有传感器的最大延时$t_d^{max}$，传感器可针对需求生成自己的队列(比如GPS)。在观测器中，我们总是利用最新的IMU测量值来向前更新状态。具体的处理机制如\autoref{fig:Delayedmeasurementupdate}，为了方便说明，我们将所有的状态都计为$x_i$，测量值都计为$z_i$。
-\begin{figure}[htbp]
-	\centering
-	\includegraphics[width=0.7\textwidth]{Delayed and out-of-order measurement update.png}
-	\bicaption{延时更新处理机制}{Delayed measurement handling mechanism.}
-	\label{fig:Delayedmeasurementupdate}
-\end{figure} 
-
-$z_1$作为最旧的状态，首先输入到观测器上。$z_2$、$z_3$、$z_4$临时存储在队列中。根据传感器的延时$z_1$用于修正$x_2$的状态，然后向前更新历史状态。最新的状态$x_5$则通过最新的IMU数据进行预测更新。
-
-\gdutsubsection{我们的算法实现}{Implementation of our algorithm}
-为了验证所提出的传感器融合算法，我们开发了一个具有多个传感器的四旋翼飞行器平台。该平台在第1.3节中进行了讨论，如所示。实验平台是我们自行组装的平台。该平台包含一个飞控板，由IMU和一个STM32微控制器组成。其中陀螺仪的采样频率为2000Hz，加速度计的采样频率为800Hz。
-
-\autoref{fig:stateestimation}为平台的传感器配置。注意，根据任务需求和实际情况，可以直接添加或删除传感器。我们开发的程序流程如(\autoref{fig:Flowchartoffusionalgorithm})。本节将介绍了改进后算法的具体实现。
-\begin{figure}[htbp]
-	\centering
-	\includegraphics[width=0.6\textwidth]{屏幕截图 2022-03-06 210135.png}
-	\bicaption{融合算法流程图}{Flow chart of fusion algorithm}
-	\label{fig:Flowchartoffusionalgorithm}
-\end{figure}
-
-由于陀螺仪的采样频率和加速度计的采样频率不一致，我们将姿态预测和姿态修正分离，只要陀螺仪数据更新，我们就根据四元数微分方程使用角速度数据进行积分。
-\begin{equation}\label{eq:quatint}
-		\dot{q}(k)=\frac{1}{2} q \otimes \mathbf{p}(\Omega_y(k))
-\end{equation}
-
-对于加速度计来说，某些构型的飞行器机身可产生10个重力加速度大小的震动，加速度计对震动非常敏感，飞行过程中姿态的真实信息被震动加速度淹没了。针对震动噪声的问题，一般的解决方案是对加速度的数据进行一个低截止频率的低通滤波。
-
-上小节提到，我们使用观测器-预测器方法对历史状态处理，文\cite{khosravian2014velocity}在机体系下求出历史误差，没有历史状态进行修正。使用机体系下的误差对历史状态修正在实际应用中并不准确。原因是每个历史状态的机体系都是不一样的，不同坐标系的向量无法进行运算。我们使用在世界系求姿态误差，然后对历史状态进行修正。此外，由GPS差分的运动加速度和IMU的更新频率不一致，我们用线性插值计算运动加速度作补偿。设计如下观测器：
-\begin{equation}\label{eq:myrpcorrection}
-	\begin{aligned}
-		\Delta a &= \frac{v - v_{last}}{\Delta t}\\
-		a_m (k-d) &= a_{mlast} + \frac{k-d}{k-k_{last}} \Delta a\\
-		a_{ref} (k-d) &= a_m (k-d) + g e_3\\
-		\sigma &= k_a \hat{R}(k-d) a(k-d) \times a_{ref}(k-d)\\
-		q_{correction}^{RP} &= \mathbf{p}(\sigma)\\
-		\hat{q}(k-n) &= q_{correction}^{RP} \otimes \hat{q}(k-n)
-	\end{aligned}
-\end{equation}
-其中，$a_m (t-d)$为$k-d$时刻通过插值计算的运动加速度，$\hat{R}(k-d)$为$k-d$时刻的姿态，$\sigma$为$k-d$时刻的修正量。我们使用$k-d$时刻的误差修正当前状态。
-
-同理，根据我们在上一节对偏航解耦的分析，对磁力计/GPS的延时处理，设计如下观测器：
+对磁力计/GPS的延时处理，设计如下观测器：
 \begin{equation}\label{eq:myyawcorrection}
 	\begin{aligned}
 		\sigma &= k_y (\psi_{mag/gps}(k-d) - \hat{\psi}(k-d)) \\
@@ -617,16 +604,7 @@ $z_1$作为最旧的状态，首先输入到观测器上。$z_2$、$z_3$、$z_4$
 \end{equation}
 其中，$\psi_{mag/gps}(k-d)$为$k-d$时刻由磁力计/GPS就算的偏航角，$d$可以根据传感器不同更改。
 
-和姿态估计类似，位置速度估计也可以分为预测和修正两部分，只要加速度数据更新，我们就使用加速度数据进行积分。
-\begin{equation}\label{eq:pvpredict}
-	\begin{aligned}
-		a^W(k) &= \hat{R}_B^W a^B(k) - g e_3\\
-		v(k) &= v(k-1) + a^W(k) \Delta t\\
-		p(k) &= p(k-1) + v(k) \Delta t
-	\end{aligned}
-\end{equation}
-其中$\Delta t$是步长。
-
+\gdutsubsection{位置速度修正}{Position and velocity correction}
 同理，仿照\autoref{eq:pvpredict}中的延时补偿方法，我们有位置速度观测器：
 \begin{equation}\label{eq:mypvcorrection}
 	\begin{aligned}
@@ -637,102 +615,626 @@ $z_1$作为最旧的状态，首先输入到观测器上。$z_2$、$z_3$、$z_4$
 取$n=0,1,...,d$修正$k-d$时刻到$k$时刻的历史状态。
 
 \gdutsection{实验结果}{Experimental results}
-我们通过飞行实验验证了系统的鲁棒性。在实验中，飞行器都是通过使用其板载状态估计作为反馈进行自主控制。我们使用RTK对估计器进行定量评估。实验平台的介绍在第一章。控制方法的介绍在第四章。
+我们给出了三个实验：
+(1)通过对比估计器的输出与RTK数据，研究了估计器的性能；
+(2)与标准的Mahony算法对比；
+(3)在不同传感器扰动下测试估计器的性能。
+实验平台的介绍在第一章。
 
 \gdutsubsection{评估估计器的性能}{Evaluating estimator performance}
-我们希望通过与真值对比以研究估计器的性能，真值是由厘米级精确度的GPS/RTK系统定义的。在飞行器飞行时，本实验通过比较板载估计器输出与的GPS/RTK来评估估计的准确性。下面，我们给出RTK和板载估计的标准差。roll和pitch使用运动加速度评估，运动加速度的标准差为$\big\{ \sigma_{a_x},\sigma_{a_y} \big\}=\big\{ 22.61, 17.28 \big\}$(cm/s)。yaw的标准差为$\sigma_{\psi}=6.36$(deg)。位置的标准差为$\big\{ \sigma_{p_x},\sigma_{p_y},\sigma_{p_z} \big\}=\big\{ 3.21, 1.37, 1.44 \big\}$(cm)。速度的标准差为$\big\{ \sigma_{v_x},\sigma_{v_y},\sigma_{v_z} \big\}=\big\{ 3.37, 3.31, 4.26 \big\}$(cm/s)。
+我们希望通过与真值对比以研究估计器的性能，真值是由厘米级精确度的GPS/RTK系统定义的。
+在飞行器飞行时，本实验通过比较板载估计器输出与的GPS/RTK来评估估计的准确性。
 
-\gdutsubsection{飞行器飞行实验}{UAV flying test}
-在本实验中，我们让飞行器沿约100米长的直线轨迹飞行，最大速度为5m/s。性能是根据来自RTK的真值进行评估的。估计的轨迹、位置、速度和姿态如所示。在图中可以看到较大且频繁的姿态变化。
+\autoref{fig:attitude}是姿态的对比图，由于RTK没法输出姿态真值，我们使用原本板载飞控的输出与我们的估计器进行对比。
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=1.0\textwidth]{attitude1.eps}
+	\bicaption{姿态对比}{Attitude comparison}
+	\label{fig:attitude}
+\end{figure} 
+从\autoref{fig:attitude}中我们看出，我们估计的姿态和原本飞控板给出的姿态基本一致，表面算法整体是收敛的。
 
-我们的目标是生成适合高速飞行的状态估计。我们可以看到，估计速度与真值的速度吻合得很好。
+另一方面，RTK能输出世界坐标系下的位置和速度，我们可以通过对比估计器输出的位置、速度和RTK输出的位置、速度的一致性可以评估位置融合的效果。
+\autoref{fig:velocity}是速度对比图。
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=1.0\textwidth]{velocity.eps}
+	\bicaption{速度对比}{Velocity comparison}
+	\label{fig:velocity}
+\end{figure}
+
+\autoref{fig:position}是位置对比图。
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=1.0\textwidth]{position.eps}
+	\bicaption{位置对比}{Position comparison}
+	\label{fig:position}
+\end{figure}
+从\autoref{fig:velocity}以及\autoref{fig:position}中我们看出，我们估计的位置和速度和RTK输出的位置和速度基本一致，表面算法整体是收敛的。
+
+接下来我们量化估计器的性能指标，对于姿态来说，我们使用运动加速度间接计算估计器的精确度，我们首先通过估计器输出的姿态求出估计器输出的运动加速度，然后通过RTK输出的速度差分求出RTK输出的运动加速度，通过分析二者的误差可以评估估计器的性能指标。
+
+\autoref{fig:motionacc}是运动加速度对比图。
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=1.0\textwidth]{motionacc.eps}
+	\bicaption{运动加速度对比}{Motion acceleration comparison}
+	\label{fig:motionacc}
+\end{figure}
+可见，二者的运动加速度基本一致。
+
+接下来我们进行误差分析，我们给出各个状态误差的曲线图，如\autoref{fig:error}。
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=1.0\textwidth]{error.eps}
+	\bicaption{状态误差分析}{State error analysis}
+	\label{fig:error}
+\end{figure}
+接下来我们会给出误差的标准差。
+
+整体飞行轨迹如\autoref{fig:trajectory}所示
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=1.0\textwidth]{trajectory.eps}
+	\bicaption{飞行轨迹}{Flight trajectory}
+	\label{fig:trajectory}
+\end{figure}
+
+下面，我们给出RTK和板载估计的标准差，如\autoref{stdestimate}所示。
+其中，运动加速度的标准差记为$\big\{ \sigma_{a_x},\sigma_{a_y} \big\}$，
+偏航角$\psi$的标准差记为$\sigma_{\psi}$，
+位置的标准差记为$\big\{ \sigma_{p_x},\sigma_{p_y},\sigma_{p_z} \big\}$，
+速度的标准差记为$\big\{ \sigma_{v_x},\sigma_{v_y},\sigma_{v_z} \big\}$。
+
+\begin{table}[htbp]
+	\bicaption{估计值标准差}{Standard error of estimation}
+	\label{stdestimate}
+	\begin{tabular}{cc}
+		\toprule
+		状态量 & 标准差 \\
+		\midrule
+		$\big\{ \sigma_{a_x},\sigma_{a_y} \big\}$ & $\big\{ 22.61, 17.28 \big\}$(cm/s) \\
+		$\sigma_{\psi}$ & $6.36$(deg)   \\
+		$\big\{ \sigma_{p_x},\sigma_{p_y},\sigma_{p_z} \big\}$ & $\big\{ 3.21, 1.37, 1.44 \big\}$(cm)   \\
+		$\big\{ \sigma_{v_x},\sigma_{v_y},\sigma_{v_z} \big\}$ & $\big\{ 3.37, 3.31, 4.26 \big\}$(cm/s)   \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+\gdutsubsection{算法对比}{Algorithm comparison}
+
+\gdutsubsection{传感器扰动下评估估计器的性能}{Evaluate the performance of the estimator under sensor disturbance}
 
 \gdutsection{总结与讨论}{Summary and discussion}
-在本章中，我们展示了使用IMU作为主要传感器，融合其他传感器进行状态估计以实现飞行器的稳定飞行。关键技术是考虑了传感器延时，运动加速度补偿以及异常处理相关的算法。此外，我们将容易受到磁场干扰的偏航角和俯仰、横滚角解耦以保证系统的鲁棒性。本文提出的算法可以使飞行器保持稳定。
+在本章中，我们展示了使用IMU作为主要传感器，融合其他传感器进行状态估计以实现飞行器的稳定飞行。
+我们提出了预测-修正-延时融合框架，以处理多频率多延时的传感器系统。
+我们对每个传感器的特性进行研究，针对磁场干扰及运动加速度补偿进行优化处理，以提高系统的鲁棒性。
+本文提出的算法可以使飞行器保持稳定。
 
 \gdutchapter{基于多位置法的IMU校准算法研究}{Research on IMU calibration algorithm based on multi-position method}
-在本章中，我们研究如何使用较少的仪器来进行高精度的传感器校准以提供更好的传感器数据。一般来说，基于MEMS的传感器的精度都比较差，远远达不到高精度导航的要求。然而，开发基于MEMS的传感器的飞行器，要保证传感器数据精度是很困难的。在本章中，我们研究传感器校准算法，开发了一种不需要外部设备就可以进行较高精度的校准。我们详细介绍了基于优化的传感器校准算法，并将其与融合和控制方法(第4章)结合起来进行实验，以验证系统的性能。
+在本章中，我们研究如何使用较少的仪器来进行高精度的传感器校准以提供更好的传感器数据。
+一般来说，基于MEMS的传感器的精度都比较差，远远达不到高精度导航的要求。
+然而，开发基于MEMS的传感器的飞行器，要保证传感器数据精度是很困难的。
+我们研究传感器校准算法，开发了一种不需要外部设备就可以进行较高精度的校准。
+我们详细介绍了基于优化的传感器校准算法，并将其与融合和控制方法(第4章)结合起来进行实验，以验证系统的性能。
 
-本系统的关键技术是一种传感器校准算法，能够无需外部设备的情况下进行校准。我们要求校准算法能够使用人手就能完成，无需外部设备，在尽量简单的校准流程下保证校准结果的准确性。
+本系统的关键技术是一种传感器校准算法，能够无需外部设备的情况下进行校准。
+我们要求校准算法能够使用人手就能完成，无需外部设备，在尽量简单的校准流程下保证校准结果的准确性。
 
-\gdutsection{加速度计校准}{Acceleromter calibration}
-首先建立加速度计的传感器模型，并利用重力的向量大小进行标定\cite{jekeli2012inertial}。对于加速度计，我们使用静态检测的方法\cite{fong2008methods}，并使用基于方差的检测算法\cite{sabatini2006wavelet}。由于需要提取静止的重力向量，我们可以对原始数据进行静态检测，放宽校准种严格的静止的条件。利用校准后的参数将原始数据转化为标准的重力向量$g$。
-
-我们的检测器基于基于Tedaldi的方法：对于每个加速度计样本$\begin{bmatrix}
-	a^t_x & a^t_y & a^t_z
-\end{bmatrix}$，给定一个长度为t秒的时间间隔时刻，我们计算方差的大小
-\begin{equation}\label{eq:var}
-	\zeta(t)=\sqrt{[var_{t_w}(a^t_x)]^2+[var_{t_w}(a^t_y)]^2+[var_{t_w}(a^t_z)]^2}
-\end{equation}
-其中$var_{t_w}(a^t)$是一个运算符，计算加速度计$a^t$在以$t$为中心，长度为$t_w$秒的时间间隔内的方差。我们通过判断$\zeta(t)$是否小于或大于一个阈值对静态和运动间隔进行分割。与传统的六面校准法相比\cite{尹杭2014一种}，该方法在可以在任意姿态下保持静止。
+\gdutsection{问题描述}{Problem formulation}
+基于MEMS的低成本IMU误差通常包括不精确的尺度、传感器敏感轴不对齐和零偏的影响。
+IMU校准指的是辨识这些物理量的过程。
+我们首先要将这些参数用数学语言描述出来，以便我们综合设计算法。
 
 \gdutsubsection{传感器误差模型}{Sensor error model}
-对于加速度计，有
+在第二章我们已经对传感器建立了数学模型，但这个模型是校准后的模型。
+下面描述的是校准前的模型。
+
+对于一个理想的IMU，三轴传感器应该具备相同的三维正交敏感轴，比例因子应该将每个传感器测量的数字量转换为真实的物理量(如加速度和角速度)。
+实际上，基于MEMS的低成本IMU误差通常包括不精确的尺度、传感器敏感轴不对齐和零偏的影响。
+
+轴正交误差可以建模成一个矩阵
 \begin{equation}\label{eq:axiserror}
-	T^{a}=
+	T=
 	\begin{bmatrix}
 		1 & \beta_{yz} & \beta_{zy}\\
 		\beta_{xz} & 1 & \beta_{zx}\\
 		\beta_{xy} & \beta_{yx} & 1
 	\end{bmatrix}
 \end{equation}
-其中，$T^a$是轴正交矩阵，$\beta_{ij}$是第$i$个传感器轴的误差对第$j$个轴的造成的误差影响。
+其中，$T$是轴正交矩阵，$\beta_{ij}$是第$i$个传感器轴的误差对第$j$个轴的造成的误差影响。
 
-此外，加速度计受到零偏和尺度误差的影响。引入尺度矩阵
+比例因子误差可以建模成一个对角阵
 \begin{equation}\label{eq:scaleerror}
-	K^{a}=
+	K=
 	\begin{bmatrix}
-		s^a_x & 0 & 0\\
-		0 & s^a_y & 0\\
-		0 & 0 & s^a_z
+		s_x & 0 & 0\\
+		0 & s_y & 0\\
+		0 & 0 & s_z
 	\end{bmatrix}
 \end{equation}
-我们接着引入零偏向量
+零偏可以建模成一个向量
 \begin{equation}\label{eq:scaleerror}
-	b^{a}=
+	b=
 	\begin{bmatrix}
-		b^a_x\\
-		b^a_y\\
-		b^a_z
+		b_x\\
+		b_y\\
+		b_z
 	\end{bmatrix}
 \end{equation}
 完整的传感器误差模型为
 \begin{equation}\label{eq:sensorerrormodel}
+	x^O=T K (x^S + b + \nu)
+\end{equation}
+其中，$x$指一种三轴传感器，$x^O$和$x^S$分别表示校准后和校准前的传感器数据，$ν$是传感器测量噪声。
+那么我们可以由\autoref{eq:sensorerrormodel}写出加速度计和陀螺仪的误差模型。
+
+加速度计的误差模型为
+\begin{equation}
 	a^O=T^a K^a (a^S + b^a + \nu^a)
 \end{equation}
-其中，$a^O$和$a^S$分别表示校准后和校准前的加速度数据，$ν^a$是加速度计测量噪声。
+陀螺仪的误差模型为
+\begin{equation}\label{eq:accerrormodel}
+	\omega^O=T^\omega K^\omega (\omega^S + b^\omega + \nu^\omega)
+\end{equation}
+从而，我们也得到需要求解的参数，将这些参数定义为
+\begin{equation}\label{eq:thetadef}
+	\theta = 
+	\begin{bmatrix}
+		\beta_{yz},\beta_{zy},\beta_{xz},\beta_{zx},\beta_{xy}, \beta_{yx},s_x,s_y,s_z,b_x,b_y,b_z
+	\end{bmatrix}
+\end{equation}
+那么我们可以由\autoref{eq:thetadef}写出加速度计和陀螺仪的待求参数。
 
-\gdutsection{陀螺仪校准}{Gyroscope calibration}
-一般来说，对于陀螺仪校准，要完整校准出零偏、尺度和轴正交要比加速度计校准复杂得多。即使对角速度精度有较高得要求，由于缺乏相应的设备，也无法校准出陀螺仪的尺度和轴正交参数。简单的陀螺校准无法用于高精度的导航上。因此，基于Tedaldi的方法\cite{tedaldi2014robust}，我们将对陀螺仪进行十二参数的标定。
+加速度计的待求参数向量为
+\begin{equation}
+	\theta^a = 
+	\begin{bmatrix}
+		\beta_{yz}^a,\beta_{zy}^a,\beta_{xz}^a,\beta_{zx}^a,\beta_{xy}^a, \beta_{yx}^a,s_x^a,s_y^a,s_z^a,b_x^a,b_y^a,b_z^a
+	\end{bmatrix}
+\end{equation}
+陀螺仪的待求参数向量为
+\begin{equation}
+	\theta^\omega = 
+	\begin{bmatrix}
+		\beta_{yz}^\omega,\beta_{zy}^\omega,\beta_{xz}^\omega,\beta_{zx}^\omega,\beta_{xy}^\omega, \beta_{yx}^\omega,s_x^\omega,s_y^\omega,s_z^\omega,b_x^\omega,b_y^\omega,b_z^\omega
+	\end{bmatrix}
+\end{equation}
 
-\gdutsection{磁力计校准}{Magnetometer calibration}
-磁力计本身的系统误差非常大，直接用原始数据计算偏航角的精度十分差以至于无法用于控制飞行器的偏航。因此，我们基于椭球拟合的方法来校准磁力计\cite{李勇2012基于椭球拟合的三轴磁传感器误差补偿方法}。我们使用牛顿迭代法求解最小二乘问题，因为代价函数是非线性的。传感器测量模型与章节3.1相同。
+\gdutsection{校准算法分析}{Calibration algorithm analysis}
+将校准问题用数学语言表述之后，我们将讨论具体的算法实现，分析各种算法的优劣以及目前存在的问题，以引出我们的设计。
+
+\gdutsubsection{外部设备}{External equipments}
+IMU校准的传统方法是通过使用特殊的机械平台来完成的，如机器人机械手、转台。
+具体操作是以已知的旋转速度移动IMU到精确控制的姿态上\cite{hall2000case}。
+在每个姿态上，加速度计的输出与预先计算的重力向量进行比较，而在旋转期间，陀螺仪的输出与预先计算的旋转速度进行比较。
+然而，用于校准的机械平台通常非常昂贵，导致校准成本往往超过IMU的硬件成本。
+
+\gdutsubsection{多位置法}{Multi-position method}
+多位置法最早是由Lotters等人提出的\cite{lotters1998procedure}。
+Lotters等人提出，利用静态加速度的大小必须等于重力的大小这一事实，来校准加速度计的零偏和尺度。
+所有参数都可以通过在一组静态姿态上最小化残差来估计。
+在校准完加速度计后，可以利用加速度计测量到的重力矢量位置作为基准来校准陀螺仪。
+积分两个连续静止位置之间的角速度，可以估计在新位置上的重力向量。
+最终通过这些估计值与校准后的加速度计给出的重力参考值之间的误差最小化来校准陀螺仪。
+此方法适用于底成本IMU校准上。
+
+\gdutsection{基于多位置法的IMU校准}{Multi-position method based IMU calibration}
+本节描述了一种校准IMU的方法，以提高IMU本身的数据精度。
+这项工作的主要目标是开发一种无需外部设备，只需要用手移动传感器，并将其置于一组不同的静态位置(姿态)，通过简单的流程就能实现校准。
+我们的关键贡献是一种基于\cite{tedaldi2014robust}的方法，提出了新的最优阈值的算法，改进了参数估计算法，提高了IMU本身输出数据的精度。
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.3\textwidth]{屏幕截图 2022-04-03 100222.png}
+	\bicaption{校准流程图}{Flow chart of calibration}
+	\label{fig:Flowchartofcalibration}
+\end{figure}
+
+\gdutsubsection{校准流程}{Calibration procedure}
+如上一节所介绍的，本文的校准流程需要收集原始加速度计和陀螺仪读数的数据集，当操作员将IMU移动到不同的静态位置时，产生了一组明显的、稳定的旋转。
+我们的IMU校准流程如\autoref{fig:Flowchartofcalibration}。
+\autoref{fig:Flowchartofcalibration}中的$t_wait$是每个静态区间的最大长度。
+\autoref{fig:Flowchartofcalibration}中的$T_{init}$是初始化静止时间，初始化阶段是用于计算陀螺仪零偏和静态检测系数。
+我们记校准流程中IMU旋转的姿态次数为N。
+为了避免校准参数估计中的不可观性，至少需要收集12组不同姿态的。
+一般来说，N越大，校准结果越好。
+同时保持每个静态间隔的持续时间减少，以满足陀螺仪零偏不变的假设。
+参数估计算法后面给出伪代码。
+
+\gdutsubsection{非线性优化}{Nonlinear optimization}
+我们使用非线性优化的方法估计IMU参数。
+首先需要写出加速度计和陀螺仪的代价函数。
+
+我们定义以下函数:
+\begin{equation}
+	a^O=h(a^S,\theta^a) =T^a K^a (a^S + b^a)
+\end{equation}
+这里，我们可以忽略测量噪声，这是因为在我们的校准程序中，我们对每个静态区间的加速度信号求均值。
+我们记录N组稳定的姿态。
+我们在每个静态间隔内的一个时间窗口内平均加速度计读数可以提取M个加速度矢量$a^S_k$。
+我们用来估计加速度计参数的代价函数为:
+\begin{equation}\label{eq:costacc}
+	L(\theta^a)=\sum_{k=1}^{M}(\left\|g\right\|-\left\|h(a^S,\theta^a)\right\|)^2
+\end{equation}
+其中，$\left\|g\right\|$是当地重力矢量的实际大小。
+为了使\autoref{eq:costacc}最小化，我们使用Levenberg-Marquardt(LM)算法。
+
+为了校准陀螺仪，我们可以假设陀螺仪是无偏的。
+此外，由于我们需要使用加速度计作为已知参考，因此我们使用上面计算的校准参数$\theta^a$，用\autoref{eq:accerrormodel}对加速度计读数进行校准。
+
+我们有陀螺仪数据可以在一段时间内积分出旋转，可以计算出结束位置的重力矢量。
+函数定义如下：
+\begin{equation}\label{eq:integration}
+	u_{g,k}=\phi(\omega^S_i , u_{a,k-1})
+\end{equation}
+其中，$\omega^S_i$是n个陀螺仪读数的序列，$u_{a,k-1}$是一个初始重力矢量，$u_{g,k}$是终点重力矢量，$\phi$是通过积分输入角速度来计算最终位置的积分算法。
+在这种情况下，我们可以定义代价函数为:
+\begin{equation}\label{eq:costgyro}
+	L(\theta^\omega)=\sum_{k=2}^{M}(u_{a,k}-u_{g,k})^2
+\end{equation}
+同理，我们使用LM算法最小化\autoref{eq:costgyro}求解$\theta^\omega$。
+
+\gdutsubsection{静态检测}{Static detector}
+校准的精度在很大程度上取决于静态和运动区间的可靠性：
+加速度计的校准采用静态区间，而陀螺仪的校准也采用两个连续静态区间之间的运动区间。
+基于带通滤波器的算法，比如\cite{fong2008methods}中使用的准静态检测器，在实际数据集上表现很差：
+检测到的静态区间经常包含一小部分运动。
+此外，它们还需要进行微调，因为算法依赖于三个参数。
+我们的检测器基于基于Tedaldi的方法\cite{tedaldi2014robust}：对于每个加速度计样本$\begin{bmatrix}
+	a^t_x & a^t_y & a^t_z
+\end{bmatrix}$，给定一个长度为$t_{wait}$秒的时间间隔时刻，我们计算方差的大小
+\begin{equation}\label{eq:var}
+	\zeta(t)=\sqrt{[var_{t_w}(a^t_x)]^2+[var_{t_w}(a^t_y)]^2+[var_{t_w}(a^t_z)]^2}
+\end{equation}
+其中$var_{t_w}(a^t)$是一个运算符，计算加速度计$a^t$在以$t$为中心，长度为$t_w$秒的时间间隔内的方差。
+我们通过判断$\zeta(t)$是否小于或大于一个阈值对静态和运动间隔进行分割。
+作为阈值，我们考虑方差大小平方$\zeta_{init}$的整数倍。
+其中，$\zeta_{init}$是初始化阶段的方差。
+需要注意的是，Tedaldi的静态检测器不需要任何参数调整：
+检测中使用的系数由Tedaldi的校准算法自动估计(参见第IV-D节)。
+而我们将提出一种新的系数估计算法。
+\autoref{fig:staticdetection}显示了静态检测是如何处理真实数据的。
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.7\textwidth]{屏幕截图 2022-04-03 103640.png}
+	\bicaption{静态检测示意图}{Diagram of static detection}
+	\label{fig:staticdetection}
+\end{figure}
+静态检测器由黑色方波表示，它的高电平是一个静态区间。
+
+\gdutsubsection{龙格-库塔积分}{Runge-Kutta Integration}
+如\autoref{eq:integration}所述，在陀螺仪校准中，我们需要对离散时间角速度进行积分。
+因此需要一种鲁棒且稳定的数值积分方法以提高校准精度。
+由于我们使用四元数算法表示旋转，在此描述下，合适的积分算法选择是四阶龙格-库塔法(RK4n)\cite{andrle2013geometric}。
+RK4n优于标准的线性积分算法，输出更高精度的结果。
+定义四元数运动学的微分方程如下：
+\begin{equation}
+	\dot{q}(k)=f(\cdot )=\frac{1}{2} q \otimes \mathbf{p}(\omega_y(k))
+\end{equation}
+RK4n积分算法如下：
+\begin{equation}\label{eq:rk4}
+	\begin{aligned}
+		q_{k+1} &= q_k + \frac{\Delta t}{6}(k_1 + 2 k_2 + 2 k_3 + k_4)\\
+		k_1 &= f(t_k , q_k)\\
+		k_2 &= f(t_k + \frac{\Delta t}{2},q_k + \frac{\Delta t}{2} k_1)\\
+		k_3 &= f(t_k + \frac{\Delta t}{2},q_k + \frac{\Delta t}{2} k_2)\\
+		k_4 &= f(t_k + \Delta t, q_k + \Delta t k_3)\\
+	\end{aligned}
+\end{equation}
+最后，对于每一步，我们还需要对k+1时刻四元数进行归一化:
+\begin{equation}
+	q_{k+1} = \frac{q_{k+1}}{\left\|q_{k+1}\right\|}
+\end{equation}
+
+\gdutsubsection{IMU参数估计算法}{IMU parameter estimation algorithm}
+我们前面介绍了非线性优化、静态检测以及龙格库塔积分算法，接下来我们将他们组合起来形成我们最后的参数估计算法。
+我们首先通过校准流程采集到加速度计和陀螺仪的数据集。
+然后在初始化阶段可以算出陀螺仪的零偏$b^\omega$以及通过\autoref{eq:var}计算$\zeta_{init}$。
+
+根据Tedaldi的算法\cite{tedaldi2014robust}，通过$\zeta_{init}$的整数倍设置阈值，检测静态区间，最小化\autoref{eq:costacc}，根据残差和的大小来选取最优的阈值。
+但从原理上，残差和其实与样本数量也有关系，不仅和校准的效果有关，因此采用残差和作为标准选择最优k值并不合适。
+我们提出基于加速度计的静态误差作为衡量标准，计算最优k值。
+静态误差定义为加速度数据与重力做差的模的均值。
+
+选取最优k值之后，再次最小化\autoref{eq:costacc}，得出加速度计的校准参数，然后通过\autoref{eq:accerrormodel}得出加速度的参考值作为陀螺仪校准的参考，最后通过最小化\autoref{eq:costgyro}，求出陀螺仪的参数。
+我们给出了以上算法的伪代码。
+
+\begin{algorithm} 
+	\caption{IMU Calibration} 
+	\label{alg1} 
+	\begin{algorithmic}
+		\REQUIRE $T_{init}$ , $t_{wait}$ ; $a^S$ and $\omega^S$ (accelerometer's and
+		gyroscope's dataset).
+%		\rule[0.25\baselineskip]{\textwidth}{0.5pt} 
+		\STATE $b^{\omega} \gets$ average gyroscope signals over $T_{init}$; 
+		\STATE $\omega^S_{biasfree} \gets \omega^S - b^{\omega}$; 
+		\STATE $M_{init} \gets$ empty matrix; 
+		\STATE $\zeta_{init} \gets $ Eq. 14, with $t_w = T_{init}$;
+		\FOR{$i=1$ \TO $k$}
+		\STATE $threshold \gets i*\zeta_{init}$;
+		\STATE $intervals \gets$ static detector computed using $t_{wait}$ and $threshold$;
+		\STATE $Params_{acc} \gets$ optimize Eq. 11 using
+		$intervals$ and $a_S$, averaging with $t_{wait}$; 
+		\STATE $error \gets $ static error computed using $Params_{acc}$ and $a_S$;
+		\STATE $M_{init} \gets [Params_{acc},threshold,intervals,error]$;
+		\ENDFOR
+		\STATE $index_{opt} \gets $ index of the minimum error in $M_{inf}$; 
+		\STATE $Params_{acc} \gets $ from $M_{inf}$ using $index_{opt}$; 
+		\STATE $intervals_{opt} \gets $ from $M_{inf}$ using $index_{opt}$; 
+		\STATE $a^O \gets$ calibrate $a^S$ using $Params_{acc}$;
+		\STATE $Params_{gyro} \gets $ optimize Eq. 13 using $intervals_{opt},\omega^S_{biasfree}$ and $a^O$, averaging with $t_{wait}$. 
+	\end{algorithmic} 
+\end{algorithm}
 
 \gdutsection{实验结果}{Experimental results}
-实验环境不需要任何外部设备。在所有的实验中，我们只需要采集传感器的原始数据。实验平台在第1章中进行了讨论。实验平台是基于开源飞控。这个现成的飞控板配有一个IMU、一个磁力计和一个STM32微控制器。
+我们给出了两个实验：
+(1)研究校准算法本身的性能；
+(2)与标准的Tedaldi算法对比；
+在第一章有说明，我们使用飞控板上的IMU作为实验平台。
+IMU是BMI088。
 
-\gdutsubsection{加速度计校准结果}{Accelrometer calibration result}
-在本实验中，采集IMU原始数据，使其以任意姿态静止。整个校准流程为3分钟。校准精度是根据重力模长进行评估的。加速度计校准结果显示在。
+\gdutsubsection{评估校准结果}{Evaluating calibration result}
+我们按照校准流程采集IMU数据，如\autoref{fig:Flowchartofcalibration}。
+接着我们执行IMU参数估计算法，静态检测效果如\autoref{fig:staticdetect}
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=1.0\textwidth]{staticdetect.eps}
+	\bicaption{静态区间分割效果}{Static interval extraction result}
+	\label{fig:staticdetect}
+\end{figure}
+\autoref{fig:staticdetect}是分割的可视化效果。
+紫色高电平区间内为静态区间。
+可见, 我们的静态检测可以取得较不错的效果。
 
-\gdutsubsection{陀螺仪校准结果}{Gyroscope calibration result}
-这个实验给出陀螺校准结果。陀螺仪和加速度计同时校准。校准精度是根据角度误差来评估的。陀螺仪校准结果显示在。
+加速度计和陀螺仪校准结果在\autoref{IMUparameters}
+\begin{table}[htbp]
+	\bicaption{IMU参数}{IMU parameters}
+	\label{IMUparameters}
+	\begin{tabular}{ccc}
+		\toprule
+		参数 & 加速度计 & 陀螺仪 \\
+		\midrule
+		$\beta_{yz}$ & -0.0039 & 0.0034\\
+		$\beta_{zy}$ & 0.0081 & 0.0038\\
+		$\beta_{xz}$ & 0.0002 & -0.0013\\
+		$\beta_{zx}$ & -0.0037 & 0.0040\\
+		$\beta_{xy}$ & -0.0072 & -0.0078\\
+		$\beta_{yx}$ & 0.0047 & 0.0023\\
+		$s_x$ & 0.9921 & 1.0006\\
+		$s_y$ & 0.9963 & 1.0003\\
+		$s_z$ & 0.9959 & 0.9993\\
+		$b_x$ & 14.7897 & 2.0444\\
+		$b_y$ & -7.4082 & -2.6646\\
+		$b_z$ & 3.0406 & 0.5780\\
+		\bottomrule
+	\end{tabular}
+\end{table}
+在得到IMU参数后，我们对校准效果进行评估。
+对于加速度计，我们观察校准前和校准后加速度的输出。
+从\autoref{fig:acccalib}可以明显看出校准后的加速度更接近于重力。
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=1.0\textwidth]{acccalib.eps}
+	\bicaption{加速度校准前后对比}{Acceleration calibration before and after comparison}
+	\label{fig:acccalib}
+\end{figure}
+我们给出加速度计校准的误差分析，如\autoref{acccaliberr}
+\begin{table}[htbp]
+	\bicaption{加速度计校准误差}{Accelerometer calibration error}
+	\label{acccaliberr}
+	\begin{tabular}{ccc}
+		\toprule
+		状态 & 平均误差$m/s^2$ & 最大误差$m/s^2$ \\
+		\midrule
+		校准前 & 0.064126 & 0.181936 \\
+		校准后 & 0.004935 & 0.013467 \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+其中，平均误差是指加速度计输出的数据模长与重力的差的平均值，最大误差是指所有加速度计输出的数据模长中与重力的差的最大值。
 
-\gdutsubsection{磁力计校准结果}{Magnetometer calibration result}
-在本实验中，采集磁力计原始数据，以足够多的姿态运动飞控。校准精度根据磁场模长进行评估。磁力计校准结果显示在。
+对于陀螺仪，我们通过对角速度积分的姿态进行评估。
+我们使用校准后的加速度计的输出作为真值。
+我们进行了两个评估实验：
+(1)分段区间积分对比姿态；
+(2)全过程积分对比姿态；
+
+第一个实验结果如\autoref{fig:piece}
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=1.0\textwidth]{piece.eps}
+	\bicaption{分段姿态积分对比}{Piece attitude integral comparison}
+	\label{fig:piece}
+\end{figure}
+第一个实验只对比每个区间终点姿态，真值由加速度计得到。
+由\autoref{fig:piece}能看出，校准后的姿态更接近与真值。
+
+第二个实验结果如\autoref{fig:full}
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=1.0\textwidth]{full.eps}
+	\bicaption{全程姿态积分对比}{Overall attitude integral comparison}
+	\label{fig:full}
+\end{figure}
+第二个实验对比整个校准过程积分的姿态，真值由加速度计得到。
+由\autoref{fig:full}能看出，校准后的姿态更接近与真值，并且无校准的姿态由于零偏误差较大。
+
+我们给出陀螺仪校准的误差分析，如\autoref{gyrocaliberr}
+\begin{table}[htbp]
+	\bicaption{陀螺仪校准误差}{Gyroscope calibration error}
+	\label{gyrocaliberr}
+	\begin{tabular}{ccc}
+		\toprule
+		状态 & 平均误差$deg$ & 最大误差$deg$ \\
+		\midrule
+		校准前 & 1.4431 & 1.5965 \\
+		校准后 & 0.1255 & 0.8970 \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+其中，平均误差是陀螺仪短期积分的姿态与加速度计计算的姿态的差的平均值，最大误差是指所有陀螺仪短期积分的姿态与加速度计计算的姿态的差的最大值。
+%\begin{table}[htbp]
+%	\bicaption{IMU参数}{IMU parameters}
+%	\label{IMUparameters}
+%	\begin{tabular}{ccccccccccccc}
+%		\toprule
+%		传感器 & $\beta_{yz}$ & $\beta_{zy}$ & $\beta_{xz}$ & $\beta_{zx}$ & $\beta_{xy}$ & $\beta_{yx}$ & $s_x$ & $s_y$ & $s_z$ & $b_x$ & $b_y$ & $b_z$\\
+%		\midrule
+%		加速度计 & -0.0039 & 0.0081 & 0.0002 & -0.0037 & -0.0072 & 0.0047 & 0.9921 & 0.9963 & 0.9959 & 14.7897 & -7.4082 & 3.0406\\
+%		陀螺仪 & 0.0081 & 0.0038\\
+%		\bottomrule
+%	\end{tabular}
+%\end{table}
+
+\gdutsubsection{算法对比}{Algorithm comparison}
 
 \gdutsection{总结与讨论}{Summary and discussion}
 在本章中，我们提出了一种IMU校准算法，该方法能够在无需外部设备的情况下进行校准。我们对校准评估标准方法的进行优化。我们的方法能够使精度提高到xxx。
 
 \gdutchapter{多旋翼飞行器的控制算法设计}{Design of control algorithm for multi-rotor aircraft}
-本章讨论如何调整控制方法，以配合飞行器稳定飞行的需要。我们介绍了保证状态估计和控制平滑的系统体系结构。
+本章讨论如何设计控制算法，以配合飞行器稳定飞行的需要。
+基于第二章的状态估计算法，控制器有800Hz的状态量作为反馈值。
+通常这些测量值可以通过我们提出的状态估计算法得到。
 
-\gdutsection{反馈控制}{Feedback control}
-在给定估计的状态后，我们让飞行器用位置跟踪控制器来跟踪所需的轨迹\cite{lee2010geometric}。由传感器融合模块(第二章)的状态估计直接作为控制器的反馈。在本文的设计中，姿态控制器和位置控制器都在STM32以400Hz的频率运行。
+\gdutsection{问题描述}{Problem formulation}
+在对被控对象进行设计控制率之前，我们需要对被控对象进行建模。
+对于我们的被控对象，需要对被控对象的动力学模型建立数学模型分析，以便我们综合设计系统。
+
+\gdutsubsection{多旋翼飞行器动力学模型}{Dynamics model of multi-rotor aircraft}
+考虑图\autoref{fig:modelaerialrobot}中所示的多旋翼飞行器模型。
+这是一个由四个相同的电机和螺旋桨组成的系统。
+通过螺旋桨产生的推力和扭矩垂直于飞行器所在平面。
+我们选择了北东地(NED)坐标系作为世界坐标系，前右下坐标系作为机体坐标系。
+机体坐标系的原点位于飞行器的质心。
+
+基于这个模型，我们定义如下物理量
+
+$m \in \mathbb{R}$，飞行器总质量；
+
+$J \in \mathbb{R}^{3 \times 3}$，表示在机体坐标系下的转动惯量矩阵;
+
+$R \in SO(3)$，从机体坐标系到世界坐标系的旋转矩阵；
+
+$\omega^b \in \mathbb{R}^3$，表示在机体坐标系下的角速度；
+
+$x \in \mathbb{R}^3$，表示在世界坐标系下的飞行器质心的位置；
+
+$v \in \mathbb{R}^3$，表示在世界坐标系下的飞行器质心的速度；
+
+$f \in \mathbb{R}$，螺旋桨沿电机轴产生的总推力；
+
+$\tau \in \mathbb{R}^3$，表示在机体坐标系下的螺旋桨产生的总力矩；
+
+基于以上定义，多旋翼飞行器的运动方程可以写成
+%\begin{center}
+\begin{gather}\label{eq:dynamics}
+%\begin{equation}\label{eq:dynamics}
+%	\begin{aligned}
+		\dot{x} = v\\
+		m\dot{v} = mge_3 - fRe_3\\
+		\dot{R} = R\hat{\omega}^b\\
+		J\dot{\omega}^b + \omega^b \times J \omega^b = \tau
+%	\end{aligned}
+%\end{equation}
+\end{gather}
+%\end{center}
+
+\gdutsection{控制算法分析}{Control algorithm analysis}
+在获得了飞行器的状态后，我们可以使用各种现有的控制策略使飞行器稳定飞行。
+线性控制器，如PID控制器或LQR控制器，被广泛应用于多旋翼飞行器中\cite{hoffmann2007quadrotor,castillo2004stabilization,nice2004design}。
+基于飞行器工作接近悬停状态的假设下，对于低速运行、加速度变化小的飞行器，可以使用线性控制器。
+针对四旋翼无人机在饱和位置下的线性化动力学问题，Guenard等人设计了一种非线性控制器\cite{guenard2005dynamic}。
+文献\cite{bouabdallah2005backstepping}中应用了反步和滑模技术。
+因为这些控制器是基于欧拉角设计的，它们在表示多旋翼飞行器复杂的旋转运动时表现出奇点，从而从根本上限制了它们跟踪轨迹的能力。
+基于李群上的刚体动力学描述，Lee等人设计了一种应用在四旋翼飞行器的几何控制器，并证明了几乎全局稳定性\cite{lee2010geometric}。
+对于包含大姿态变化的运动，文献\cite{lee2010geometric}的控制器是更合适的选择。
+我们基于\cite{lee2010geometric}的设计控制系统。
+
+\gdutsection{控制算法设计}{Control algorithm design}
+我们设计了一个控制器跟踪轨迹。
+我们直接针对非线性耦合系统设计控制器。
+
+\gdutsubsection{控制框架设计}{Control scheme design}
+控制器总体框架如\autoref{fig:controllerstructure}所示。
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=1.0\textwidth]{屏幕截图 2022-04-04 222027.png}
+	\bicaption{控制框架图}{Controller structure}
+	\label{fig:controllerstructure}
+\end{figure}
+运动方程\autoref{eq:dynamics}具有级联结构。
+姿态的转动运动与平动运动解耦。
+平动只依赖于公式(4.3)中的$fRe_3$项。
+总推力$f$的大小是直接控制的，而总推力$Re_3$的方向是由机体轴$\vec{b}_3$决定的。
+因此，为了改变总推力的方向，应相应地改变姿态。
+这里,我们选择所需的总推力$f$以及目标姿态$R_d e_3$作为输入跟踪位置$x_d$。
+控制力矩$\tau$作为输入跟踪目标姿态$R_d$。
+
+\gdutsubsection{控制率设计}{Control law design}
+根据\autoref{fig:controllerstructure}展示的控制框架，控制器可以分为位置控制器和姿态控制器两部分。
+
+对于位置控制器，我们直接针对非线性耦合系统设计控制器。
+这种类型的位置控制器最终产生的目标值为旋转矩阵$R_d$和拉力$f$。
+我们将位置控制器解耦成水平控制器和高度控制器。水平控制器输出目标姿态$R_d$，高度控制器输出推力$f$。
+
+对于目标姿态的生成，根据文献\cite{lee2010geometric}给出的控制律为
+\begin{gather}\label{eq:Horizontalcontrol}
+	\vec{b}_{3d} = -\frac{-k_x e_x - k_v e_v - mge_3 + m\ddot{x}_d}{\left\|-k_x e_x - k_v e_v - mge_3 + m\ddot{x}_d\right\|}
+\end{gather}
+其中，$\vec{b}_{3d}$是期望机体系z轴在世界坐标系的表示，由z轴的坐标我们能根据几何关系算出目标横滚角$\phi_d$和目标俯仰角$\theta_d$，加上直接给定的目标偏航角$\psi_d$可以得到$R_d$。
+
+对于推力的生成，根据多旋翼飞行器的结构，控制率为
+\begin{gather}\label{eq:AltitudeControl}
+	f = -\frac{ma_d + f_0 cos\theta_0 cos\phi_0}{cos\theta cos\phi}
+\end{gather}
+其中，$f_0 cos\theta_0 cos\phi_0$表示了悬停油门。
+
+对于姿态控制器，根据文献\cite{yu2015high}给出的稳定控制律为
+\begin{equation}\label{eq:attitudecontrol}
+	\tau = \omega^b \times J \omega^b + K_p log(R_e)^{\vee} - K_d \omega^b_e
+\end{equation}
+注意到$log(R_e)$可以看作是目标角速度$\omega^b_d$。
+\autoref{eq:attitudecontrol}中的第二项和第三项可以分开控制。
+
+角速度控制
+\begin{gather}\label{eq:angularacontrol}
+	\omega^b_e = log(R_e)^{\vee} - \omega^b\\
+	\dot{\omega}^b_d = K_p \omega^b_e
+\end{gather}
+
+角加速度控制
+\begin{gather}\label{eq:angularaccelerationcontrol}
+		\dot{\omega}^b_e = \dot{\omega}^b_d - \dot{\omega}^b\\
+		\tau = K_p \dot{\omega}^b_e + K_i \int_{0}^{t}\dot{\omega}^b_e + \omega^b \times J \omega^b
+\end{gather}
 
 \gdutsection{实验结果}{Experimental results}
 我们有一个基于多传感器融合的状态估计器来产生800Hz的位置、速度、姿态估计，足以稳定飞行器。
 
-在这个实验中，飞行器以大约1米/秒的速度自动沿着矩形轨迹生成平滑轨迹。使用GPS/RTK在信号良好的状态下来量化全局跟踪性能。由图xxx可以看出，飞行器的实际位置收敛到期望位置，其标准差为xxx，表明控制器的稳定收敛。
+实验中，我们随意遥控飞行器前后左右飞行，记录机体姿态的实际响应情况。
+以下是测试结果。
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.7\textwidth]{屏幕截图 2022-04-06 150427.png}
+	\bicaption{横滚与俯仰跟踪结果}{Roll and pitch tracking results}
+	\label{fig:Rptrackingresults}
+\end{figure}
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.7\textwidth]{屏幕截图 2022-04-06 151409.png}
+	\bicaption{横滚与俯仰控制输出}{Roll and pitch control output}
+	\label{fig:Rpcontroloutput}
+\end{figure}
+
+从\autoref{fig:Rptrackingresults}中可看到：
+(1)姿态有一定的超调，但是超调后的回复过程是平稳的。
+(2)观察控制俯仰角跟踪-30°期望角度时的结果可以看出，我们的算法存在一些稳态误差，后续可通过积分设计改善；
+(3)整体控制输出较为平滑，可以满足实际飞行需求。
+
+\gdutsection{总结与讨论}{Summary and discussion}
+在本章中，我们整合了现有的控制算法，完成了整个飞行控制系统的闭环，实现飞行器的稳定飞行。
 
 \gdutbackmatter
 \gdutchapter{结论与展望}{Conclusion and prospect}
