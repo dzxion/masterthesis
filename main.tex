@@ -64,8 +64,8 @@
     % hyperlink-color = {prl},
   },
   info = {
-    title           = {多旋翼飞行器导航与控制算法研究},
-    title*          = {Research on navigation and control algorithm of multi-rotor aircraft},
+    title           = {多旋翼飞行器状态估计与控制算法研究},
+    title*          = {Research on state estimation and control algorithm for multi-rotor aircraft},
     date            = {2022/5/25},
     author          = {邓正雄},
     author*         = {Deng Zhengxiong},
@@ -95,59 +95,55 @@
 \begin{document}
 
 \begin{abstract}
-  由于多旋翼飞行器具有体积小、悬停能力强、机动性强等优点，其在监视、搜索和救援等场景有很好的应用前景。
-  在这些场景中，飞行器必须能够自主飞行，以尽量减少操作员的工作量。
+  多旋翼飞行器具有体积小、悬停能力强、机动性强等优点，是在复杂环境中进行监视和搜救的理想平台。
+  在这些应用场景中，飞行器必须能够自主飞行，以尽量减少操作员的工作量。
   随着近年来机器人技术的快速发展，能够实现自主飞行的飞行器已经广泛应用于各种场景当中。
   
-  然而，要让飞行器在各种场景中安全地作业还有很多需要解决的工程问题。
+  然而，要让飞行器在各种场景中安全地作业还存在许多需要解决的工程问题。
   其一，所有依赖于单一传感器的方法只能在特定的环境中发挥作用。
-  因此，需要有来自多个传感器的信息，融合所有可用的测量数据可以提高估计精度和鲁棒性。
-  目前，如何处理多源信息融合是一个有挑战性的工程问题。
-  其二，传感器种类多了之后就会带来传感器扰动的问题。
-  每个传感器都可能受干扰。
-  因此，需要对传感器的扰动设计算法进行处理，保证飞行的安全性。
-  目前，如何处理传感器扰动是一个有挑战性的工程问题。
-  其三，飞行器上用的一般是低成本MEMS传感器，这种传感器本身数据精度较差。
+  因此，飞行器需要融合来自多个传感器的信息以提高状态估计的精度和鲁棒性。
+  然而，目前的融合框架不支持以模块化和可扩展的方式融合多个异构传感器的信息。
+  其二，每个传感器在运行过程中都有可能受到干扰。
+  因此，飞行器需要对传感器的扰动进行处理，以保证飞行的安全性。
+  然而，目前的传感器异常处理算法还不完善。
+  其三，飞行器上用的是低成本MEMS传感器，这种传感器数据精度较差。
   因此，需要对这些传感器进行校准以提高传感器的精度。
-  目前，在不使用高精度外部设备下对低成本传感器进行校准是一个工程问题。
-  最后，解决这些工程问题需要对估计、校准、控制等算法进行综合设计。
+  然而，在不使用高精度外部设备下对低成本传感器进行校准是困难的。
+  最后，解决上述这些工程问题需要对状态估计、传感器校准、控制等算法进行综合设计。
   其中，状态估计是自主飞行中首要和最关键的组成部分。
   
-  本文提出了以状态估计为重点的方法和系统设计，以满足飞行器的稳定飞行的需求。
-  首先，提出了预测-修正-延时融合框架，以处理以处理多源信息融合的问题。
-  然后，提出了解耦策略以及运动加速度插值延时补偿算法，以解决运动加速度延时不准确以及磁场干扰影响横滚角、俯仰角的问题。
-  其次，进一步优化了IMU校准算法，提出了新的最优阈值计算的算法，改进了参数估计算法，以提高IMU本身输出数据的精度。
+  本文提出了以状态估计为重点的系统设计，以满足飞行器的稳定飞行的需求。
+  首先，针对多源信息融合问题，提出了预测-修正-延时融合框架，以模块化和可扩展的方式融合多个异构传感器的信息。
+  然后，针对传感器干扰问题，提出了解耦策略以及运动加速度插值延时补偿算法，以对运动加速度以及磁场干扰这类扰动进行处理。
+  其次，针对传感器校准问题，提出了新的最优阈值计算的算法，进一步优化了IMU校准算法，以提高IMU本身输出数据的精度。
   最后，设计了控制算法，形成一个完整的飞行控制系统。
-  本文提供了大量的实验结果。
-  最后，提出了未来的研究方向。
+  本文提供了大量的实验结果并提出了未来的研究方向。
 \end{abstract}
 
 \begin{abstract*}
-  Because of the advantages of small size, strong maneuverability and hovering ability, multi-rotor aircraft has a good application prospect in surveillance, search and rescue scenarios.
-  In these scenarios, the vehicle must be able to fly autonomously to minimize the workload of the operator.
-  With the fast development of robotics in recent years, aircraft capable of autonomous flight has been widely used in various scenarios.
+  The multi-rotor aircraft has the advantages of small volume, strong hovering ability and strong maneuverability. It is an ideal platform for surveillance and search and rescue in complex environment.  
+  In these applications, the vehicle must be able to fly autonomously to minimize the workload of the operator.  
+  With the rapid development of robot technology in recent years, aircraft capable of autonomous flight has been widely used in various scenarios.  
   
-  However, we need to solve some engineering problem to make the vehicle operate safely in various scenarios.
-  One is that all approaches that rely on a single sensor work only in a specific environment.
-  Therefore, we need to have information from multiple sensors, and fusing all available measurements can improve estimation accuracy and robustness.
-  At present, how to deal with multi-source information fusion is a challenging engineering problem.
-  Second, more kinds of sensors will bring the problem of sensor disturbance.
-  Every sensor can be disturbed.
-  Therefore, we need to deal with the disturbance design algorithm of sensor to ensure the safety of flight.
-  At present, how to deal with sensor disturbance is a challenging engineering problem.
-  Third, low-cost MEMS sensors are used on the aircraft, and their data accuracy is poor.
-  Therefore, we need to calibrate these sensors to improve their accuracy.
-  Currently, the calibration of low-cost sensors without high-precision external equipment is an engineering problem.
-  Finally, to solve these engineering problems, estimation, calibration, control and other algorithms should be designed comprehensively.
-  Among them, state estimation is the first and most critical part of autonomous flight.
+  However, there are many engineering issues that need to be solved to make the vehicle operate safely in various scenarios.  
+  One is that all approaches that rely on a single sensor work only in a specific environment.  
+  Therefore, the aircraft needs to fuse information from multiple sensors to improve the accuracy and robustness of state estimation.  
+  However, current fusion frameworks do not support the fusion of information from multiple heterogeneous sensors in a modular and scalable manner.  
+  Second, every sensor is susceptible to interference during operation.  
+  Therefore, the aircraft needs to deal with the disturbance of sensors to ensure the safety of flight.  
+  However, the current sensor exception processing algorithm is not perfect.  
+  Third, the aircraft uses low-cost MEMS sensors, which have poor data accuracy.  
+  Therefore, it is necessary to calibrate these sensors to improve their accuracy.  
+  However, it is difficult to calibrate low-cost sensors without using high-precision external equipment.  
+  Finally, to solve these engineering problems, state estimation, sensor calibration, control and other algorithms should be designed comprehensively.  
+  Among them, state estimation is the first and most critical part of autonomous flight.  
   
-  This thesis presents a method and system design focusing on state estimation to meet the requirements of stable flight of aircraft.
-  Firstly, we propose a prediction-correction-delay fusion framework to solve multi-source information fusion problem.
-  Then, the decoupling strategy and interpolation delay compensation algorithm of motion acceleration are proposed to solve the problems of inaccurate delay of motion acceleration and the influence of magnetic field on roll and pitch Angle.
-  Secondly, we further optimize the IMU calibration algorithm, propose a new optimal threshold calculation algorithm, and improve the parameter estimation algorithm to improve the accuracy of IMU output data.
-  Finally, we integrate the control algorithm to form a complete flight control system.
-  In this paper, we present a large number of experimental results.
-  Finally, we propose future research directions.
+  This paper presents a system design focusing on state estimation to meet the requirements of stable flight of aircraft.  
+  Firstly, for the problem of multi-source information fusion, a prediction-correction-delay fusion framework is proposed to fuse the information of multiple heterogeneous sensors in a modular and extensible way.  
+  Then, the decoupling strategy and interpolation delay compensation algorithm of motion acceleration are proposed to deal with the disturbance of motion acceleration and magnetic field interference.  
+  Secondly, aiming at the sensor calibration problem, a new optimal threshold calculation algorithm is proposed to further optimize the IMU calibration algorithm to improve the accuracy of IMU output data.  
+  Finally, the control algorithm is designed to form a complete flight control system.  
+  In this paper, a large number of experimental results are presented and future research directions are proposed.  
 \end{abstract*}
 
 %\begin{notation}
@@ -166,22 +162,30 @@
 在这些场景中，飞行器必须能够自主飞行，以尽量减少操作员的工作量。
 随着近年来机器人技术的快速发展，能够实现自主飞行的飞行器已经广泛应用于各种场景当中，如航空摄影、交通运输和智能农业等。
 除了上述应用场景外，在人员和地面机器人难以接近或危险复杂环境中，飞行器在监视、搜索和救援任务中具有巨大的潜力。
-在这样的环境中，飞行器作业的主要挑战是状态估计的稳定性。
-要想提高状态估计的稳定性需要加入更多的传感器。
-这里的难点包括如何处理多源信息融合以及如何处理传感器扰动。
-对于多源信息融合，由于传感器具有多频率多延时的特性，设计的难点在于算法需要能兼容多个传感器并在不改动程序的情况下能添加/减少传感器。
-对于传感器干扰，常见的干扰包括但不限于气压计干扰、磁场干扰、GPS信号异常等。
-另一方面，由于使用低成本的MEMS传感器，传感器本身的数据精度限制了导航系统的精度。
-到目前为止，研发一个多旋翼飞行器，并能够在这样的环境中快速自主飞行，仍然会带来挑战性的工程问题，需要对估计、校准、控制等算法进行综合设计。
-因此，本文将对状态估计、校准和控制这三个问题进行研究。
+
+在这样的环境中，飞行器要稳定安全地完成作业任务还存在许多挑战。
+首先，所有依赖于单一传感器的方法只能在特定的环境中发挥作用。
+因此，要保证状态估计的稳定性就需要融合更多的传感器，这就引出多源信息融合问题。
+%这里的难点包括如何处理多源信息融合以及如何处理传感器扰动。
+对于多源信息融合问题，由于传感器具有多频率多延时的特性，难点在于算法需要能兼容多个传感器并在不改动程序的情况下能添加或减少传感器。
+其次，每个传感器在运行过程中都有可能受到干扰。
+常见的传感器扰动包括但不限于气压计干扰、磁场干扰、GPS信号异常等。
+飞行器在受到传感器扰动的情况下难以保证安全性。
+对于传感器扰动问题，由于每个传感器的扰动特性不一样，难点在于算法能否有效隔离扰动并不影响状态的连续性。
+再次，飞行器上用的是低成本MEMS传感器，传感器的数据精度限制了状态估计的精度。
+因此需要对传感器进行校准。
+对于传感器校准问题，难点在于在不使用高精度外部设备下对低成本传感器进行校准。
+
+到目前为止，研发一个多旋翼飞行器，并能够在这样的环境中快速自主飞行，需要对状态估计、传感器校准、控制等算法进行综合设计。
+因此，本文将对状态估计、传感器校准和控制这三个问题进行研究。
 其中，状态估计是自主飞行中首要和最关键的组成部分。
 
 \gdutsection{国内外研究现状}{Analysis of the research status at home and abroad}
-近年来，人们对应用在多旋翼飞行器的导航与控制系统进行了广泛的研究。
-本文首先回顾了多旋翼飞行器发展过程中出现的一些研究问题，回顾关于每个问题及其相关领域的文献。
-本节将对估计、校准、控制三个问题进行回顾。
+近年来，人们对应用在多旋翼飞行器的自主飞行算法进行了广泛的研究。
+本文回顾了多旋翼飞行器发展过程中出现的一些研究问题及其相关领域的文献。
+本节将对状态估计、传感器校准、控制三个问题进行回顾。
 
-\gdutsubsection{传感器融合}{Sensor fusion}
+\gdutsubsection{状态估计}{State estimation}
 稳定准确地估计一个刚体的状态(即位置和姿态)是机器人鲁棒和高性能控制的关键要求。
 机器人的状态估计是一个非线性的问题，使用的传感器通常包含了非高斯噪声\cite{baldwin2009inertial}。
 一种标准的方法是使用扩展的随机线性估计技术\cite{lefferts1982kalman,barshan1995inertial}。
@@ -257,17 +261,17 @@ Tedaldi等人在多位置法的基础上进行改进，提出了一种鲁棒且�
 
 \gdutsection{实验平台概述}{Overview of Experimental Platforms}
 本课题研究的一个关键步骤是对提出的算法和系统进行实验验证。
-为此，本文开发了适合实验目的的飞行器平台。
+为此，本文开发了一个多旋翼飞行器平台。
 本课题的飞行器平台(\autoref{fig:platform})是使用现成的组件构建的。
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.6\textwidth]{platform.png}
+	\includegraphics[width=0.47\textwidth]{platform.png}
 	\bicaption{实验平台}{Experimental platform}
 	\label{fig:platform}
 \end{figure} 
 
 飞行器机架材质是碳纤维，具有较好的刚性。
-飞行器的主要参数如\autoref{Mainparametersofaircraft}。
+飞行器的主要参数如\autoref{Mainparametersofaircraft}所示。
 \begin{table}[h]
 	\bicaption{飞行器主要参数}{Main parameters of aircraft}
 	\label{Mainparametersofaircraft}
@@ -315,30 +319,29 @@ BMI088的加速度计量程最大是24g，陀螺仪的最大量程是2000°/s。
 本文中讨论的所有算法都是用C++实现，运行在上文提到的飞控板上。
 
 \gdutsection{本文研究内容及安排}{Thesis contributions and overview}
-本文的研究工作在于多旋翼飞行器导航与控制系统相关算法的开发。
+本文的研究工作在于多旋翼飞行器自主飞行相关算法的开发。
 首先，提出了预测-修正-延时融合框架，以处理多频率多延时的传感器系统。
 然后，对每个传感器的特性进行研究，针对磁场干扰及运动加速度补偿进行优化处理，以提高系统的鲁棒性。
 其次，进一步优化了IMU校准算法，提出了新的最优阈值的算法，提高了IMU本身输出数据的精度。
 最后，整合了控制算法，形成一个完整的飞行控制系统。
 论文由五个章节组成，每个章节的安排如下：
 
-第一章为绪论，详细介绍本课题的研究背景与意义，介绍了多旋翼飞行器的导航与控制系统的三个关键问题，分别对融合、校准、控制的研究现状进行了详细介绍，并阐述了本文的主要贡献和论文的结构安排。
+第一章为绪论，详细介绍本课题的研究背景与意义，介绍了多旋翼飞行器自主飞行中的三个关键问题，分别对状态估计、传感器校准、控制问题的研究现状进行了详细介绍，并阐述了本文的主要贡献和论文的结构安排。
 
-第二章介绍了导航系统的开发，提出了预测-修正-延时融合框架，以处理多频率多延时的传感器系统。并且对每个传感器的特性进行研究，针对磁场干扰及运动加速度补偿进行优化处理，以提高系统的鲁棒性。
+第二章介绍了状态估计算法的设计，提出了预测-修正-延时融合框架，以处理多频率多延时的传感器系统。并且对每个传感器的特性进行研究，针对磁场干扰及运动加速度补偿进行优化处理，以提高系统的鲁棒性。
 
-第三章介绍了校准算法的设计，进一步优化了IMU校准算法，提出了新的最优阈值的算法，提高了IMU本身输出数据的精度。
+第三章介绍了传感器校准算法的设计，进一步优化了IMU校准算法，提出了新的最优阈值的算法，提高了IMU本身输出数据的精度。
 
-第四章介绍了控制系统的开发，整合了现有控制方法，以满足飞行器稳定飞行的需求，形成一个完整的飞行控制系统。
+第四章介绍了控制算法的设计，整合了现有控制方法，以满足飞行器稳定飞行的需求，形成一个完整的飞行控制系统。
 
 第五章为总结与展望。最后对研究工作进行总结并提出了未来的研究方向。
 
 \gdutchapter{基于多频率和多延时测量的状态估计研究}{State estimation based on multi-rate and multi-delay measurements}
-本章介绍了本课题开发的一种适用于多旋翼飞行器的传感器融合算法，使用IMU作为主要传感器。
-本课题感兴趣的是在飞行器平台上运行的状态估计算法，这种应用场景对于传感器融合有不一样的要求。
-因此，针对这些系统需求处理传感器融合、异常处理等问题。
+本章介绍了本课题开发的一种适用于多旋翼飞行器的状态估计算法，使用IMU作为主要传感器。
+本课题感兴趣的是在飞行器平台上运行的状态估计算法，这种应用场景对于传感器融合有更严格更复杂的要求。
 
 本研究注意到，这个课题已经有很多的研究成果\cite{mahony2008nonlinear,hua2010attitude,khosravian2016state}。
-本课题的工作与现有成果之间的主要区别在于，本课题的系统在了前人工作的基础上，提出了新的框架，具有很强的鲁棒性。
+本课题的工作与现有成果之间的主要区别在于，本课题的系统在前人工作的基础上，提出了新的框架，具有很强的鲁棒性。
 确保该系统能够在大震动、高机动环境、磁场干扰环境中稳健运行，在这些环境中，依赖单一现有成果的算法是不可行的。
 给出了各种环境下的实验结果，要求系统在一段较长的时间内无故障运行。
 \begin{figure}[htbp]
@@ -356,9 +359,8 @@ BMI088的加速度计量程最大是24g，陀螺仪的最大量程是2000°/s。
 
 \gdutsection{问题描述}{Problem formulation}
 状态估计的目标是输出机器人六自由度的状态。
-状态包括了三自由度的位置和三自由度的姿态。
-首先要将位置和姿态用数学语言描述出来。
-对于本课题所使用的传感器，需要对每个传感器建立数学模型分析，以便综合设计系统。
+状态包括三自由度的位置和三自由度的姿态。
+首先用数学语言描述姿态和位置，然后对每个传感器建立数学模型。
 
 \gdutsubsection{坐标系定义}{Coordinate system definition}
 飞行器的位置、速度都可以抽象成三维向量，这就需要定义坐标系。
@@ -376,15 +378,15 @@ BMI088的加速度计量程最大是24g，陀螺仪的最大量程是2000°/s。
 接着，再定义一个坐标系：
 其坐标原点位于飞行器质心，z轴轴垂直于地面并指向地心，x轴与机体系$\vec{b}_1$轴在水平面内的投影重合，y轴与机体系$\vec{b}_2$轴在水平面内的投影重合。此坐标系记位$bodyheading$坐标系。
 这样，飞行器的位置向量，速度向量，加速度向量，角速度向量就都有了可以表示的坐标系。
-使用上标的方式描述状态量所投影的坐标系，将世界坐标系和机体坐标系中的向量分别定义为为$(\cdot)^w$和$(\cdot)^b$。
-用$p^w$、$v^w$、$a^w$表示世界坐标系中飞行器的位置、速度、加速度。
+使用上标的方式描述状态量所投影的坐标系，将世界坐标系和机体坐标系中的向量分别定义为$(\cdot)^w$和$(\cdot)^b$。
+用$p^w$、$v^w$、$a^w$分别表示世界坐标系中飞行器的位置、速度、加速度。
 
 \gdutsubsection{姿态表示}{Attitude representation}
-姿态是描述两个坐标系之间相对关系。
+姿态是描述两个坐标系之间的相对关系。
 目前有四种流行的姿态表示法，分别是欧拉角、旋转矩阵、四元数和旋转矢量\cite{shuster1993survey}。
 
 在众多姿态表示方法中，欧拉角的应用最为广泛\cite{stuelpnagel1964parametrization}。
-可以将姿态表示为三个角度。
+欧拉角可以将姿态表示为三个角度。
 如\autoref{fig:eulerangle}所示，定义机体坐标系与世界坐标系之间的夹角为飞机的姿态角，又称欧拉角：
 \begin{itemize}
 	\item 俯仰角$\theta$：机体轴与地平面(水平面)之间的夹角，飞机抬头为正。
@@ -402,11 +404,11 @@ BMI088的加速度计量程最大是24g，陀螺仪的最大量程是2000°/s。
 但是，当俯仰角$\theta \pm \frac{\pi}{2}$时，欧拉角存在自锁现象(gimbal lock)。
 在自锁点附近，横滚角$\phi$及航向角$\psi$的导数会趋向于无穷大，这也是欧拉角表示方法的奇异点。
 因此，不需要在算法中使用欧拉角进行运算。
-接下来引入旋转矩阵。
+接下来本文引入旋转矩阵。
 
 如\autoref{fig:modelaerialrobot}，可以用坐标系W的坐标轴表示坐标系B的基。
 记坐标系B的基坐标为$x_{wb}, y_{wb}, z_{wb} \in \mathbb{R}^3$。
-然后定义旋转矩阵
+定义旋转矩阵
 \begin{equation}\label{eq:rotationmatrixdefinition}
 R_b^w = 
 \begin{bmatrix}
@@ -419,14 +421,14 @@ x_{wb} & y_{wb} & z_{wb}
 SO(3) \triangleq \left\{ R \in \mathbb{R}^{3 \times 3} | det(R) = 1, R^T R = R R^T = I_3 \right\}
 \end{equation}
 旋转矩阵用了九个参数去表示三个自由度的姿态。
-显然可以用更少的参数去表示姿态，接下来引入旋转矢量。
+显然可以用更少的参数去表示姿态，接下来本文引入旋转矢量。
 
 根据欧拉旋转定理，任何一个三维旋转可以表示为绕一根转轴$u$旋转一个角度$\theta$，其中转轴$u$是单位向量\cite{palais2007euler}。
-因此最直接的姿态的表示方法就是单位向量$u$和角度$\theta$，这种方法被称为欧拉轴-角(axis-angle)。
+因此最直接的姿态的表示方法是单位向量$u$和角度$\theta$，这种方法被称为欧拉轴-角(axis-angle)。
 为了一些计算上的方便，可以把轴和角相乘，得到一个三维空间内的一般向量$u\theta$。
 很容易验证$u\theta$和欧拉轴-角是一一对应的，这就是姿态的另一种表示方法，即旋转矢量。
 最后需要说明的是，当$\theta = 2\pi$时，旋转矢量$u\theta$的导数会出现无穷大的情况，这是旋转矢量表示方法的奇异点。
-接下来引入四元数。
+接下来本文引入四元数。
 
 四元数是对复数数系的进一步拓展，由四个实数表示：
 \begin{equation}\label{eq:quatdef1}
@@ -473,13 +475,12 @@ SO(3) \triangleq \left\{ R \in \mathbb{R}^{3 \times 3} | det(R) = 1, R^T R = R R
 实际上，本文的算法中使用的状态量是以四元数表示，但是计算过程会涉及到各种表示的转换。
 
 \gdutsubsection{刚体运动学}{Rigid body kinematics}
-将位置、姿态定义之后，需要考虑他们的运动学方程。
 对于飞行器，可以将其看作三维空间的一个刚体。
 使用旋转矩阵表示，刚体姿态运动学可以用如下方程描述
 \begin{gather}\label{eq:matrixkinematics}
 	\dot{R}=R (\omega)_{\times}
 \end{gather}
-\vspace{1ex}其中$R$为刚体的姿态。$(\omega)_{\times}$为反对称矩阵，其定义为
+其中$R$为刚体的姿态。$(\omega)_{\times}$为反对称矩阵，其定义为
 \begin{gather}\label{eq:matrixkinematics}
 	(\omega)_{\times}=
 	\begin{bmatrix}
@@ -497,10 +498,10 @@ SO(3) \triangleq \left\{ R \in \mathbb{R}^{3 \times 3} | det(R) = 1, R^T R = R R
 \begin{gather}\label{eq:matrixkinematics}
 	\dot{p}=v
 \end{gather}
-其中$p$为刚体的位置，刚体运动学是设计观测器的基本。
+其中$p$为刚体的位置，刚体运动学是设计观测器的基本方程。
 
 \gdutsubsection{传感器模型}{Sensor model}
-多旋翼飞行器上用于状态估计的传感器是有IMU(陀螺仪+加速度计)、磁力计、GPS、气压计。
+本文在多旋翼飞行器上配置的传感器有IMU(陀螺仪+加速度计)、磁力计、GPS、气压计。
 其中，最基本的传感器是MEMS IMU。
 一般的IMU由一个三轴陀螺仪和一个三轴加速度计组成。
 
@@ -534,7 +535,7 @@ $\eta_m$通常是比较小的。
 \end{equation}
 其中$z^w$是世界系的位置向量，$\eta$是测量噪声。
 
-\gdutsection{导航算法分析}{Navigation algorithm analysis}
+\gdutsection{传统状态估计方法分析}{Analysis of traditional state estimation methods}
 将状态估计问题用数学语言表述之后，本节将讨论具体的算法实现，分析各种算法的优劣以及目前存在的问题，以引出本文的设计。
 
 \gdutsubsection{矢量观测}{Vector observations}
@@ -548,10 +549,11 @@ Shuster在1979年在文献\parencite{shuster1981three}中提出的QUEST(QUaterni
 例如，迭代的次数必须提前定义。
 此外，矢量观测的本质是代数解法，主要缺点是没有记忆特性，即过去测量的状态所包含的信息没有被保存下来。
 
-\gdutsubsection{滤波器/观测器}{Filter/observer}
-滤波器/观测器算法是作为替代代数方法的解决方案被提出的。
-因为当矢量测量值有噪声时，通常首选滤波算法。
-滤波器将矢量测量与运动学方程结合起来。
+\gdutsubsection{观测器}{Observer}
+观测器在更多场合中被称作滤波器。
+观测器算法是作为替代代数方法的解决方案被提出的。
+因为当矢量测量值有噪声时，通常首选观测器算法。
+观测器将矢量测量与运动学方程结合起来。
 在这类算法中，非线性观测器是一类十分有价值的方法。
 它们通常具有更强的稳定性和鲁棒性，非常容易调参和实现。
 Mahony等人提出的非线性显式互补滤波器是一个被广泛运用的方法\cite{mahony2008nonlinear}。
@@ -592,7 +594,7 @@ Mahony等人提出的非线性显式互补滤波器是一个被广泛运用的�
 其中$k_P$，$k_I$，$k_i$是任意非负的观测器增益。
 $v_i$是可用的矢量测量。
 注意到姿态$\hat{R}$是整个观测器的输出。
-在文献\parencite{mahony2008nonlinear}中对观测器(\autoref{eq:Explicitfilter})进行了广泛的研究，表明姿态和零偏能做到指数收敛(理论和实验)。
+在文献\parencite{mahony2008nonlinear}中对观测器(\autoref{eq:Explicitfilter})进行了广泛的研究，表明姿态和零偏在理论和实验上能做到指数收敛。
 该滤波器具有互补的特性，利用陀螺仪信号的高频部分和磁力计、加速度计的低频部分\cite{mahony2008nonlinear}。
 与这些信号相关联的截止频率由增益$k_P$，$k_I$，$k_i$决定。
 用于表示旋转的单位四元数在代码实现中具有较高的效率，是实现SO(3)\vspace{1ex}群运算的常用方法。
@@ -603,11 +605,11 @@ $v_i$是可用的矢量测量。
 		\omega_{mes} \coloneqq \sum_{n=1}^{n} k_i v_i \times \hat{v}_i	
 \end{gather}
 
-\gdutsection{基于多频率多延时的传感器融合算法}{Multi-rate and multi-delay based sensor fusion}
+\gdutsection{基于多频率和多延时测量的状态估计方法}{State estimation method based on multi-frequency and multi-delay measurement}
 本节描述了一种融合来自多频率多延时传感器信息的方法，以提高系统在各种环境中的鲁棒性。
 这项工作的主要目标是开发一种模块化和可扩展的方法来集成来自多个传感器的测量值，为稳定飞行提供平滑准确的实时状态估计。
 本文第一个关键贡献，也是本文工作的核心，是一种基于\parencite{mahony2008nonlinear}的原则性方法，通过预测-修正-延时框架来融合所有传感器的测量值。
-第二个重要的贡献是本课题提出的观测器公式，它的更新步骤避免扰动对状态影响的耦合以及异常处理的困难。
+第二个重要的贡献是本文提出的观测器公式，它的更新步骤避免扰动对状态影响的耦合以及异常处理的困难。
 最后，本文使用实验平台(\autoref{fig:platform})测试了结果，以说明本文的融合框架在飞行中的鲁棒性。
 算法流程如\autoref{fig:Flowchartoffusionalgorithm}。
 %这里只大致概括了对信息处理的一个流程。
@@ -651,7 +653,7 @@ $z_2$、$z_3$、$z_4$临时存储在队列中。
 根据传感器的延时$z_1$用于修正$x_2$的状态，然后向前更新历史状态。
 最新的状态$x_5$则通过最新的IMU数据进行预测更新。
 
-这样，可以方便的增加/减少传感器，在程序中即增加/减少队列，同时可以为每个传感器设置延时，进行时间同步。
+这样，可以方便的增加或减少传感器，在程序中即增加或减少队列，同时可以为每个传感器设置延时，进行时间同步。
 
 \gdutsubsection{状态预测更新}{State propagation}
 由于陀螺仪的采样频率和加速度计的采样频率不一致，将姿态预测和姿态修正分离，只要陀螺仪数据更新，就根据\autoref{eq:quatkinematics}使用角速度数据进行积分。
@@ -667,10 +669,11 @@ $z_2$、$z_3$、$z_4$临时存储在队列中。
 其中$\Delta t$是步长。
 
 \gdutsubsection{运动加速度延时补偿修正}{Motion acceleration delay compensation correction}
-对于加速度计来说，某些构型的飞行器机身可产生10个重力加速度大小的震动，加速度计对震动非常敏感，飞行过程中姿态的真实信息被震动加速度淹没了。
-针对震动噪声的问题，一般的解决方案是对加速度的数据进行一个低截止频率的低通滤波。
-
-上小节提到，可以使用观测器-预测器方法对历史状态处理，文献\parencite{khosravian2014velocity}在机体系下求出历史误差，没有历史状态进行修正。
+%对于加速度计来说，某些构型的飞行器机身可产生10个重力加速度大小的震动，加速度计对震动非常敏感，飞行过程中姿态的真实信息被震动加速度淹没了。
+%针对震动噪声的问题，一般的解决方案是对加速度的数据进行一个低截止频率的低通滤波。
+对于姿态来说，运动加速度是作为加速度计的扰动输入进修正项影响姿态精度。
+针对运动加速度补偿问题，一般的解决方案是使用GPS的线速度进行补偿，但是GPS速度存在延时问题，还需要对历史状态处理。
+文献\parencite{khosravian2014velocity}使用观测器-预测器方法对历史状态处理，在机体系下求出历史误差，但并没有对历史状态进行修正。
 使用机体系下的误差对历史状态修正在实际应用中并不准确。
 原因是每个历史状态的机体系都是不一样的，不同坐标系的向量无法进行运算。
 因此，本文提出的算法对修正量进行修改，在世界系求姿态误差，然后对历史状态进行修正。
@@ -688,6 +691,8 @@ $z_2$、$z_3$、$z_4$临时存储在队列中。
 使用$k-d$时刻的误差修正当前状态。
 $q_{correction}^{RP}$是修正四元数，只修正横滚角$\phi$、俯仰角$\theta$分量。
 取$n=0,1,...,d$修正$k-d$时刻到$k$时刻的历史状态。
+
+可以注意到，标准显式互补滤波器(\autoref{eq:quatfilter})相比，本文的观测器继承了其使用叉乘计算误差的特性，对运动加速度以及延时的影响进行了优化处理。
 
 \gdutsubsection{偏航解耦修正}{Yaw decoupling correction}
 磁场干扰和零偏会影响横滚角$\phi$和俯仰角$\theta$的估计。
@@ -772,7 +777,7 @@ q^{Y} =
 \gdutsection{实验结果}{Experimental results}
 本节给出了两个实验：
 (1)通过对比估计器的输出与RTK数据，研究了估计器的性能；
-(2)在传感器扰动下测试估计器的性能。
+(2)研究了估计器在不同环境下的运行情况，验证本文提出的估计器的优越性。
 实验平台的介绍在第一章。
 
 \gdutsubsection{评估估计器的性能}{Evaluating estimator performance}
@@ -853,16 +858,38 @@ q^{Y} =
 
 (3)可见运动加速度的标准差最大为$15.28cm/s^2$，说明姿态误差不超过$1^{\circ}$，位置和速度的标准差均能达到飞行精度的要求。
 
-\gdutsubsection{传感器扰动下评估估计器的性能}{Evaluate the performance of the estimator under sensor disturbance}
-通过第一个实验可以得出本文的融合算法是可以达到要求的。
+\gdutsubsection{传感器干扰下估计器的性能评估}{Performance evaluation of estimators under sensor interference}
+通过第一个实验可以证明本文的融合算法是可以达到要求的。
 接下来通过实验验证系统的鲁棒性。
-第二个实验在传感器扰动下测试了系统的鲁棒性和安全性。
+第二个实验在不同环境下测试了系统的鲁棒性和安全性。
 
-这里需要说明的是，为了做到能处理扰动，需要要求每个传感器需要有对应的故障诊断机制。
-本文工作的一个目标让开发人员能方面的针对传感器扰动加入对应的异常处理算法。
-传感器干扰包括但不限于气压计干扰、磁场干扰、GPS信号异常等。
-这里针对磁场干扰进行实验以说明本文算法的鲁棒性和安全性。
+首先给出系统在高机动环境下的运行结果。
+%通过比对本文估计器、板载飞控以及加速度计输出的姿态来评估估计器的鲁棒性。
+以下是测试结果。
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=1.0\textwidth]{motionaccdelay.eps}
+	\bicaption{高机动环境下的姿态对比}{Attitude comparison in high maneuvering environment}
+	\label{fig:motionaccdelay}
+\end{figure}
 
+对于\autoref{fig:motionaccdelay}，蓝色线是使用标准显式互补滤波器输出的结果，没有使用融合GPS速度。
+红色线是加速度计输出的姿态角。
+黄色线是板载飞控输出的姿态角。
+紫色线是本文提出的估计器输出的姿态角。
+
+从\autoref{fig:motionaccdelay}可得出以下结论：
+
+(1)在高机动环境下标准显式互补滤波器的输出性能较差，在某些时刻姿态角偏离真实角度约有10度。
+
+(2)在高机动环境下加速度计的输出基本无法作为参考值。
+
+(3)本文的估计器输出与板载飞控输出基本一致，并且能做到相位超前。
+
+%这里需要说明的是，为了做到能处理扰动，需要要求每个传感器需要有对应的故障诊断机制。
+%本文工作的一个目标让开发人员能方面的针对传感器扰动加入对应的异常处理算法。
+%传感器干扰包括但不限于气压计干扰、磁场干扰、GPS信号异常等。
+然后给出系统在磁场干扰下的运行结果。
 磁力计在受到外部磁场干扰时会严重影响到偏航角$\psi$的估计。
 在本实验中，我们模拟这种干扰的出现。
 我们在飞控旁边放置一块磁铁作为干扰源，在偏航角受干扰情况下，依靠本文提出的融合框架，可以对磁场异常做出判断，将修正部分隔离，能保证总体融合结果的平滑准确。
@@ -870,7 +897,7 @@ q^{Y} =
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=1.0\textwidth]{yaw.eps}
-	\bicaption{扰动下融合效果}{Fusion result under disturbance}
+	\bicaption{磁场干扰下的偏航角估计}{Estimation of yaw Angle under magnetic field disturbance}
 	\label{fig:yaw}
 \end{figure}
 
@@ -883,10 +910,10 @@ q^{Y} =
 (3)对比融合偏航角和预测偏航角可以发现二者是存在一定误差的，在没有修正项存在的情况下不可避免，但是整体误差不会很大。
 
 \gdutsection{总结与讨论}{Summary and discussion}
-本章展示了使用IMU作为主要传感器，融合其他传感器进行状态估计以实现飞行器的稳定飞行。
-针对传感器具有多频率多延时的特性，难以处理多源信息融合的问题，提出了预测-修正-延时融合框架，能随意添加/减少传感器，解决了多源信息融合困难的问题。
+本章使用IMU作为主要传感器，融合其他传感器进行状态估计以实现飞行器的稳定飞行。
+针对传感器具有多频率多延时的特性，难以处理多源信息融合的问题，提出了预测-修正-延时融合框架，能随意添加或减少传感器，解决了多源信息融合困难的问题。
 针对运动加速度延时不准确以及磁场干扰影响横滚角、俯仰角的问题，提出了解耦策略以及运动加速度插值延时补偿算法，解决了来自加速度计和磁力计的传感器干扰的问题。
-本文提出的算法作为导航模块满足飞行器稳定飞行的需求。
+本文提出的算法作为状态估计模块满足飞行器稳定飞行的需求。
 
 本文注意到，滤波器框架并不是融合多传感器的唯一方法。
 在基于图的框架中对多传感器融合也是很简单的，因为每个测量结果只是向图中添加另一个边缘或因子节点\cite{schleicher2009real}。
@@ -904,25 +931,26 @@ q^{Y} =
 对于这些应用场景，本文的方法仍然为复杂的传感器融合问题提供了一个可行的和易于使用的解决方案。
 
 \gdutchapter{基于多位置法的IMU校准算法研究}{Research on IMU calibration algorithm based on multi-position method}
-本章研究在没有外部设备情况下来进行高精度的传感器校准以提供更好的传感器数据。
+本章介绍了本课题开发的一种适用于低成本IMU的校准算法。
 一般来说，基于MEMS的传感器的精度都比较差，远远达不到高精度导航的要求。
-然而，开发基于MEMS的传感器的飞行器，要保证传感器数据精度是很困难的。
-本文研究传感器校准算法，开发了一种不需要外部设备就可以进行较高精度的校准。
-本章详细介绍了基于优化的传感器校准算法，其作为飞行控制系统的一个基础模块，以支持飞行器的稳定飞行。
+然而，飞行器的精准作业对导航精度有非常高的要求。
+导航精度的上限是取决于传感器数据精度的上限。
+因此，提高传感器数据精度是非常关键的一环。
 
-本系统的关键技术是一种传感器校准算法，能够无需外部设备的情况下进行校准。
+本文开发了一种不需要外部设备就可以进行较高精度的校准算法。
 要求校准算法能够使用人手就能完成，无需外部设备，在尽量简单的校准流程下保证校准结果的准确性。
+本文的方法在前人工作的基础上，提出了新的最优阈值的计算方法，能避免采样数较少导致校准精度下降的情况。
 
 \gdutsection{问题描述}{Problem formulation}
 基于MEMS的低成本IMU误差通常包括不精确的尺度、传感器敏感轴不对齐和零偏的影响。
 IMU校准指的是辨识这些物理量的过程。
-首先要将这些参数用数学语言描述出来，以便综合设计算法。
+首先用数学语言描述这些待求参数。
 
 \gdutsubsection{传感器误差模型}{Sensor error model}
 第二章已经对传感器建立了数学模型，但这个模型是校准后的模型。
 下面描述的是校准前的模型。
 
-对于一个理想的IMU，三轴传感器应该具备相同的三维正交敏感轴，比例因子应该将每个传感器测量的数字量转换为真实的物理量(如加速度和角速度)。
+对于一个理想的IMU，三轴传感器应该具备相同的三维正交敏感轴，比例因子应该将每个传感器测量的数字量转换为真实的物理量，如加速度和角速度。
 实际上，基于MEMS的低成本IMU误差通常包括不精确的尺度、传感器敏感轴不对齐和零偏的影响。
 
 轴正交误差可以建模成一个矩阵
@@ -993,7 +1021,7 @@ IMU校准指的是辨识这些物理量的过程。
 	\end{bmatrix}
 \end{equation}
 
-\gdutsection{校准算法分析}{Calibration algorithm analysis}
+\gdutsection{传统校准算法分析}{Analysis of traditional calibration algorithms}
 将校准问题用数学语言表述之后，本节将讨论具体的算法实现，分析各种算法的优劣以及目前存在的问题，以引出本文的设计。
 
 \gdutsubsection{外部设备法}{External equipments}
@@ -1076,10 +1104,10 @@ IMU校准流程如\autoref{fig:Flowchartofcalibration}。
 静态检测是作用就是对采集过程进行分割，区分那一段是静止的，哪一段是运动的。
 加速度计的校准采用静态区间，而陀螺仪的校准采用两个连续静态区间之间的运动区间。
 
-基于带通滤波器的算法，比如\parencite{fong2008methods}中使用的准静态检测器，在实际数据集上表现很差：
-检测到的静态区间经常包含一小部分运动。
+基于带通滤波器的算法，比如\parencite{fong2008methods}中使用的准静态检测器，在实际数据集上表现很差。
+这类算法检测到的静态区间经常包含一小部分运动。
 此外，它们还需要进行微调，因为算法依赖于三个参数。
-本算法的检测器基于基于Tedaldi的方法\cite{tedaldi2014robust}。
+本算法的检测器是基于Tedaldi的方法\cite{tedaldi2014robust}。
 对于每个加速度计样本$\begin{bmatrix}
 	a^t_x & a^t_y & a^t_z
 \end{bmatrix}$，给定一个长度为$t_{wait}$秒的时间间隔时刻，计算方差的大小
@@ -1090,8 +1118,8 @@ IMU校准流程如\autoref{fig:Flowchartofcalibration}。
 通过判断$\zeta(t)$是否小于或大于一个阈值对静态和运动区间进行分割。
 作为阈值，考虑方差大小平方$\zeta_{init}$的整数倍。
 其中，$\zeta_{init}$是初始化阶段的方差。
-需要注意的是，Tedaldi的静态检测器不需要调参：
-Tedaldi的校准算法能自动估计出阈值。
+需要注意的是，Tedaldi的静态检测器不需要调参。
+检测器能依据某种原则自动估计出阈值。
 而本文将提出一种新的阈值估计算法。
 \autoref{fig:staticdetection}显示了静态检测是如何处理真实数据的。
 \begin{figure}[htbp]
@@ -1121,18 +1149,21 @@ RK4n积分算法如下：
 		k_4 &= f(t_k + \Delta t, q_k + \Delta t k_3)\vspace{1ex}
 	\end{aligned}
 \end{equation}
-最后，对于每一步，还需要对k+1时刻四元数进行归一化:
+最后，对于每一次迭代，还需要对k+1时刻四元数进行归一化处理:
 \begin{equation}
 	q_{k+1} = \frac{q_{k+1}}{\left\|q_{k+1}\right\|}
 \end{equation}
 
 \gdutsubsection{IMU参数估计算法}{IMU parameter estimation algorithm}
-本节前面介绍了非线性优化、静态检测以及龙格库塔积分算法，接下来将他们组合起来形成最后的参数估计算法。
+本节前面介绍了非线性优化、静态检测以及龙格库塔积分算法，接下来将上述环节组合起来形成完整的参数估计算法。本文在此基础上提出新的阈值计算方法。
+
 首先通过校准流程采集到加速度计和陀螺仪的数据集。
 然后在初始化阶段可以算出陀螺仪的零偏$b^\omega$以及通过\autoref{eq:var}计算$\zeta_{init}$。
-
 根据文献\parencite{tedaldi2014robust}描述的算法，通过$\zeta_{init}$的整数倍设置阈值，检测静态区间，最小化\autoref{eq:costacc}，根据残差和的大小来选取最优的阈值。
-但从原理上，残差和其实与样本数量也有关系，不仅和校准的效果有关，因此采用残差和作为标准选择最优k值并不合适。
+但从原理上，残差和其实不仅和校准的效果有关，与样本数量也有关系。
+样本数量越少，计算的残差和越小。
+但在样本数量少的情况下，校准效果并不是最优的。
+基于残差和的计算方法需要比较多的样本点支撑。
 本文提出基于加速度计的静态误差作为衡量标准，计算最优k值。
 静态误差定义为加速度数据与重力做差的模的均值。
 通过记录每个k值对应的静态误差，最后取静态误差最小的阈值作为最优k值。
@@ -1356,14 +1387,15 @@ IMU型号是BMI088。
 \end{table}
 
 \gdutsection{总结与讨论}{Summary and discussion}
-在本章中，针对分割阈值计算存在非最优的情况导致加速度计校准效果不佳的问题，提出了一种检测阈值最优计算算法，解决了加速度计校准结果的不准确的问题。
+本章设计了IMU校准算法。
+针对分割阈值计算存在非最优的情况导致加速度计校准效果不佳的问题，提出了一种检测阈值最优计算算法，解决了加速度计校准结果不准确的问题。
 
 和Tedaldi的算法相比，本文提出的算法修改了阈值计算的步骤。
 由于本算法需要对每个阈值都进行误差计算，所以会增加算法的运行时间。
 考虑到校准不是实时的，这部分时间是可以接受的。
 但对于校准精度来说，本文的算法能做得更好。
 
-\gdutchapter{多旋翼飞行器的控制算法设计}{Design of control algorithm for multi-rotor aircraft}
+\gdutchapter{多旋翼飞行器控制算法设计}{Design of control algorithm for multi-rotor aircraft}
 本章讨论如何设计控制算法，以配合飞行器稳定飞行的需要。
 本章首先展示多旋翼飞行器的动力学模型，然后重点介绍了控制框架以及控制率的设计，最后给出飞行测试结果。
 
@@ -1379,16 +1411,15 @@ IMU型号是BMI088。
 考虑\autoref{fig:modelaerialrobot}中所示的多旋翼飞行器模型。
 这是一个由四个相同的电机和螺旋桨组成的系统。
 通过螺旋桨产生的推力和扭矩垂直于飞行器所在平面。
-选择北东地(NED)坐标系作为世界坐标系，前右下坐标系作为机体坐标系。
 %机体坐标系的原点位于飞行器的质心。
 
 基于这个模型，定义如下物理量
 
-$m \in \mathbb{R}$，飞行器总质量；
+$m \in \mathbb{R}$，表示飞行器总质量；
 
 $J \in \mathbb{R}^{3 \times 3}$，表示在机体坐标系下的转动惯量矩阵;
 
-$R \in SO(3)$，从机体坐标系到世界坐标系的旋转矩阵；
+$R \in SO(3)$，表示从机体坐标系到世界坐标系的旋转矩阵；
 
 $\omega^b \in \mathbb{R}^3$，表示在机体坐标系下的角速度；
 
@@ -1396,7 +1427,7 @@ $x \in \mathbb{R}^3$，表示在世界坐标系下的飞行器质心的位置；
 
 $v \in \mathbb{R}^3$，表示在世界坐标系下的飞行器质心的速度；
 
-$f \in \mathbb{R}$，螺旋桨沿电机轴产生的总推力；
+$f \in \mathbb{R}$，表示螺旋桨沿电机轴产生的总推力；
 
 $\tau \in \mathbb{R}^3$，表示在机体坐标系下的螺旋桨产生的总力矩；
 
@@ -1442,11 +1473,11 @@ $\tau \in \mathbb{R}^3$，表示在机体坐标系下的螺旋桨产生的总力
 控制力矩$\tau$作为输入跟踪目标姿态$R_d$。
 
 \gdutsubsection{控制率设计}{Control law design}
-控制器的目的是为了实现跟踪给定轨迹，使飞行器的轨迹贴合给定的轨迹。
+控制器的目标是实现轨迹跟踪，使飞行器的轨迹贴合给定的轨迹。
 根据\autoref{fig:controllerstructure}展示的控制框架，控制器可以分为位置控制器和姿态控制器两部分。
-对于位置控制器，本文直接针对非线性耦合系统设计控制器。
-这种类型的位置控制器最终产生的目标值为旋转矩阵$R_d$和拉力$f$。
-将位置控制器解耦成水平控制器和高度控制器。
+对于位置控制器，本文应用文献\parencite{lee2010geometric}提出的几何方法进行设计。
+基于几何方法设计的位置控制器最终产生的目标值为旋转矩阵$R_d$和拉力$f$。
+可进一步将位置控制器解耦成水平控制器和高度控制器。
 水平控制器输出目标姿态$q_d$(四元数表示)，高度控制器输出推力$f$。
 记需要跟踪给定位置为$x_d$。
 求目标加速度：
@@ -1500,8 +1531,10 @@ a_d^{bodyheading} = q_{\psi} \otimes a_d \otimes (q_{\psi})^{*}
 \end{gather}
 
 \gdutsection{实验结果}{Experimental results}
-第二章描述的基于多传感器融合的状态估计器能产生800Hz的位置、速度、姿态估计，足以稳定飞行器。
-接下来给出两个测试实验测试控制器的性能。
+本文使用第二章描述的估计器的输出作为反馈量。
+估计器能输出800Hz的位置、速度、姿态估计。
+由于电调最高响应频率为400Hz，故本文的控制算法频率设置为400Hz。
+接下来给出两个实验测试控制器的性能。
 
 \gdutsubsection{姿态测试结果}{Attitude test results}
 本实验中，我们随意遥控飞行器前后左右飞行，记录机体姿态的实际响应情况。
@@ -1530,11 +1563,11 @@ a_d^{bodyheading} = q_{\psi} \otimes a_d \otimes (q_{\psi})^{*}
 (3)整体控制输出较为平滑，可以满足实际飞行需求。
 
 \gdutsubsection{位置测试结果}{Position test results}
-本实验中，我们随意飞行器定点悬停，记录机体位置的实际响应情况。
+本实验中，我们让飞行器定点悬停，记录机体位置的实际响应情况。
 以下是测试结果。
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.96\textwidth]{屏幕截图 2022-04-10 192550.png}
+	\includegraphics[width=0.95\textwidth]{屏幕截图 2022-04-10 192550.png}
 	\bicaption{x方向定位}{x tracking results}
 	\label{fig:xtrackingresults}
 \end{figure}
@@ -1592,18 +1625,18 @@ a_d^{bodyheading} = q_{\psi} \otimes a_d \otimes (q_{\psi})^{*}
 \gdutbackmatter
 \gdutchapter{结论与展望}{Conclusion and prospect}
 本文展示了对飞行器自主飞行的最新技术的贡献，大部分贡献是状态估计算法。
-在第三章中，开发了导航系统，提出了一种模块化和可扩展的方法，该方法能够以一致的方式组合来自多个传感器的信息。
+在第三章中，开发了状态估计算法，提出了一种模块化和可扩展的方法，该方法能够以一致的方式组合来自多个传感器的信息。
 在第四章中，开发了传感器校准算法，能够在没有外部设备的情况下对传感器进行高精度的校准。
-在第五章中，设计了控制方法并结合前两章的算法形成一个集成的飞行器系统。
+在第五章中，开发了控制算法并结合前两章的算法形成一个集成的飞行器系统。
 
-本文注意到，虽然主要的实验平台使用的是四旋翼，但本文的方法不限于这一特定类型的平台。
+本文注意到，虽然本文的实验平台是多旋翼飞行器，但本文的方法不限于这一特定类型的平台。
 实际上，本文的方法是基于传感器的，同样适用于其他机器人，如固定翼、地面机器人等。
 \gdutbacksection{成果总结}
 综上所述，本文的主要贡献如下：
 \begin{itemize}
-	\item 针对传感器信息的多样性，具有多频率多延时的特性，难以处理多源信息融合的问题，提出了预测-修正-延时融合框架，能随意添加/减少传感器，解决了多源信息融合困难的问题。
-	\item 针对运动加速度延时不准确以及磁场干扰影响横滚、俯仰角的问题，提出了解耦策略以及运动加速度插值延时补偿算法，解决了来自加速度计和磁力计的传感器干扰的问题。
-	\item 针对分割阈值计算存在非最优的情况导致加速度计校准效果不佳的问题，提出了一种检测阈值最优计算算法，解决了加速度计校准结果的不准确的问题。
+	\item 针对多源信息融合问题，提出了预测-修正-延时融合框架，在不需要调整算法的情况下可添加或减少传感器，解决了多源信息融合的困难。
+	\item 针对传感器扰动问题，提出了解耦策略以及运动加速度插值延时补偿算法，解决了飞行过程中因运动加速度或磁场干扰造成的不稳定现象。
+	\item 针对IMU校准精度不足的问题，提出了一种检测阈值最优计算算法，解决了阈值计算非最优造成的校准结果精度不足的问题。
 	\item 设计了控制算法，完成了飞行控制系统的闭环，并通过实验表明，飞行控制系统是稳定可靠的。
 \end{itemize}
 
