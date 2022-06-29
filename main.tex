@@ -48,9 +48,9 @@
 %    fullwidth-stop  = {mapping},
     % fullwidth-stop  = {catcode},
      fullwidth-stop  = {false},
-    hyperlink       = {color},
+%    hyperlink       = {color},
     % hyperlink       = {border},
-    % hyperlink       = {none},
+     hyperlink       = {none},
     hyperlink-color = {default},
     % hyperlink-color = {autumn},
     % hyperlink-color = {business},
@@ -66,25 +66,26 @@
   info = {
     title           = {基于多源信息融合的多旋翼飞行器状态估计方法研究},
     title*          = {Research on state estimation method of multi-rotor aircraft based on multi-source information fusion},
-    date            = {2022/5/25},
-%    author          = {邓正雄},
-%    author*         = {Deng Zhengxiong},
-%    supervisor      = {鲁仁全\qquad 教授},
-%    supervisor*     = {Prof. Lu Renquan},
-    author          = {2111904069},
-    author*         = {2111904069},
-    supervisor      = {***},
-    supervisor*     = {***},
+    date            = {2022/5/23},
+    author          = {邓正雄},
+    author*         = {Deng Zhengxiong},
+    supervisor      = {鲁仁全\qquad 教授},
+%    supervisor      = {鲁仁全},
+    supervisor*     = {Prof. Lu Renquan},
+%    author          = {2111904069},
+%    author*         = {2111904069},
+%    supervisor      = {***},
+%    supervisor*     = {***},
     supervisor-two  = {none},
     supervisor-two* = {none},
     department      = {自动化学院},
     department*     = {Automation},
     major           = {控制科学与工程},
     student-id      = {2111904069},
-%    chairman        = {赵六\qquad 教授},
-    chairman        = {***},
-    degree          = {工程硕士},
-    degree*         = {Master of Engineering},
+    chairman        = {裴海龙\qquad 教授},
+%    chairman        = {***},
+    degree          = {工学硕士},
+    degree*         = {(Master of Engineering Science)},
     keywords        = {多旋翼, IMU校准, 状态估计, 多传感器融合},
     keywords*       = {Multi-rotor, IMU calibration, State estimation, Multi-sensor fusion},
     secret-level    = {none},
@@ -153,17 +154,17 @@
   Multi-rotor aircraft is an ideal platform for indoor and outdoor multi-scene operations because of its small volume, good maneuverability and strong hover ability.
   With the rapid development of aircraft technology in recent years, multi-rotor aircraft has been widely used in various scenarios.
   For multi-rotor aircraft, the key technologies are state estimation and motion control in flight control system.
-  In this paper, the following two key technical issues are proposed for the safety requirements of state estimation of multi-rotor aircraft in harsh environment:
+  In this thesis, the following two key technical issues are proposed for the safety requirements of state estimation of multi-rotor aircraft in harsh environment:
   1) How to calibrate the error parameters of low-cost sensors to obtain accurate and reliable measurement values;
   2) How to integrate multi-source information to improve the accuracy and robustness of aircraft state estimation.
-  Therefore, this paper designs solutions including sensor calibration algorithm, state estimation algorithm and control algorithm for the above key technical problems with important engineering value.
+  Therefore, this thesis designs solutions including sensor calibration algorithm, state estimation algorithm and control algorithm for the above key technical problems with important engineering value.
   The specific contents and results of this study are as follows:
   
   (1) Aiming at the problem of how to calibrate low cost sensor error parameters, first of all, in view of the IMU error, sensor error model is given, and analyzes the advantages and disadvantages of various calibration algorithm, and through the experimental analysis, points out that calibration method based on the residual error and threshold segmentation under the circumstances of less sample will influence the accuracy of the calibration results.
   Therefore, a new optimal threshold calculation algorithm is proposed to ensure the optimality of calibration results and improve the precision of IMU calibration.
   
   (2) For the state estimation problem of multi-rotor aircraft, the method of single sensor can only play a role in a specific environment, and the current fusion framework does not support the fusion of multiple sensor information in a modular and scalable way.
-  Therefore, a prediction-correction-delay fusion framework is proposed, which can deal with multi-frequency and multi-delay sensor systems, and can add or subtract sensors without changing the algorithm.
+  Therefore, a prediction-correction-delay fusion framework is proposed, which can deal with multi-frequency and multi-delay sensor systems, and add or subtract sensors without changing the algorithm.
   
   (3) Aiming at the problem that multi-rotor aircraft is affected by motion acceleration and magnetic field interference during operation, magnetic field decoupling strategy and motion acceleration interpolation delay compensation algorithm are proposed, which can have good suppression effect on motion acceleration and magnetic field interference and improve the robustness of state estimation.
   
@@ -201,7 +202,7 @@
 由\autoref{fig:flightcontrolsystem}可见，飞控系统以处理器单元为核心，通过机载传感器获取飞行器的姿态、位置、速度等信息，并根据控制指令对四个电机进行转速调节。
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=1.0\textwidth]{微信图片_20220504193723.png}
+	\includegraphics[width=1.0\textwidth]{屏幕截图 2022-06-08 090529.png}
 	\bicaption{四旋翼飞行器飞行控制系统结构框图}{Quadrotor aircraft flight control system structure block diagram}
 	\label{fig:flightcontrolsystem}
 \end{figure}
@@ -247,6 +248,14 @@
 综上所述，对于多旋翼飞行器而言，运动控制中的姿态控制问题和状态估计中的IMU校准、多传感器融合及传感器扰动抑制问题是当前的研究重点。
 因此，本课题针对恶劣环境下多旋翼飞行器状态估计的难题，从优化多旋翼飞行器机载IMU传感器性能出发，寻求一融合多频率和多延时的传感器信息的方法，从而有效地提高多旋翼飞行器的状态估计精度及鲁棒性。
 本文围绕IMU校准和多传感器数据融合这两个方向上展开研究，并将状态估计与控制结合起来，研发一个完整的飞控系统作为最终目标。
+结合相关文献分析\cite{王勇军2021融合多源信息的小型多旋翼无人机位姿估计方法研究}，可将本文的研究目的和研究内容归纳为\autoref{fig:research}所示的框图。
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=1.0\textwidth]{屏幕截图 2022-06-08 091435.png}
+	\bicaption{本课题的研究目的及研究内容关系框图}{The topic research purpose and research content relationship diagram}
+	\label{fig:research}
+\end{figure}
+
 
 %在这些场景中，飞行器必须能够自主飞行，以尽量减少操作员的工作量。
 %由于多旋翼飞行器具有体积小、悬停能力强、机动性强等优点，其在监视、搜索和救援等场景有很好的应用前景。
@@ -277,7 +286,7 @@
 \autoref{fig:common}简要概括了这三个问题近年研究较多的主流算法\cite{mahony2008nonlinear,tedaldi2014robust,lee2010geometric,sarkka2017multi,benziane2016attitude,刘烨秋2019基于非线性观测器的飞行器姿态控制方法与应用,王成2018四旋翼无人机飞行控制算法综述,李轾2020两种欠驱动系统的非线性控制方法研究}。
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=1.0\textwidth]{微信图片_20220504201551.png}
+	\includegraphics[width=1.0\textwidth]{屏幕截图 2022-06-08 092121.png}
 	\bicaption{飞控系统三大环节常用算法概览}{An overview of common algorithms for the three major links of flight control system}
 	\label{fig:common}
 \end{figure}
@@ -351,12 +360,12 @@ Khosravian等人提出了一种级联观测器-预测器方法来处理李群SO(
 对于包含大姿态变化的运动，几何控制器是更合适的选择。
 本文基于文献\parencite{lee2010geometric}的控制方法进行设计，完成了飞行控制系统的闭环。
 
-\gdutsection{实验平台概述}{Overview of Experimental Platforms}
+\gdutsection{实验平台概述}{Overview of experimental platforms}
 本课题研究的一个关键步骤是对提出的算法和系统进行实验验证。
 为此，本文使用现成的组件构建了一个多旋翼飞行器平台如\autoref{fig:platform}所示。
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.47\textwidth]{platform.png}
+	\includegraphics[width=0.92\textwidth]{platform.png}
 	\bicaption{实验平台}{Experimental platform}
 	\label{fig:platform}
 \end{figure} 
@@ -379,12 +388,12 @@ Khosravian等人提出了一种级联观测器-预测器方法来处理李群SO(
 飞控板由IMU、磁力计、气压计和用户可编程的STM32微控制器组成。
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.5\textwidth]{acfly.jpg}
+	\includegraphics[width=0.8\textwidth]{acfly.jpg}
 	\bicaption{飞控板}{AutoPilot board}
 	\label{fig:AutoPilotboard}
 \end{figure}
 
-微控制器采用的STM32H743VIT6如\autoref{fig:STM32H743VIT6}所示，主频高达480M，有16Kb的L1级缓存Cache，1M内存，2MFlash，支持硬件双精度浮点运算。
+微控制器采用的STM32H743VIT6如\autoref{fig:STM32H743VIT6}所示，主频高达480M，有16Kb的L1级缓存Cache，1M内存，2M Flash，支持硬件双精度浮点运算。
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.3\textwidth]{St-Semiconductor-Chips-Electronic-Component-Lqfp-100-Stm32h743vit6.jpg}
@@ -460,18 +469,18 @@ BMI088的加速度计量程最大是24g，陀螺仪的最大量程是2000°/s。
 飞行器的位置、速度都可以抽象成三维向量，这就需要定义坐标系。
 一般会选择三个相互正交的三维向量来构成直角坐标系。
 首先定义两个坐标系，一个世界坐标系(inertial frame)，一个机体坐标系(body frame)。
-将世界坐标系记为W，将机体坐标系记为B。
-其中，W系是静止的参考坐标系，而B系是运动坐标系。
+将世界坐标系记为$W$，将机体坐标系记为$B$。
+其中，$W$系是静止的参考坐标系，而$B$系是运动坐标系。
 \begin{figure}[htbp]
 	\centering
-	\includegraphics[width=0.7\textwidth]{屏幕截图 2022-03-31 222546.png}
+	\includegraphics[width=0.8\textwidth]{屏幕截图 2022-03-31 222546.png}
 	\bicaption{飞行器模型}{The model of the aerial robot}
 	\label{fig:modelaerialrobot}
 \end{figure}
 
-如\autoref{fig:modelaerialrobot}所示，定义W系原点在飞机初始点，为北-东-地坐标系，B系原点在飞行器质心，x轴指向机头、y轴指向右侧，z轴指向下方。将世界坐标系的三个坐标轴记为$\big\{ \vec{e}_1,\vec{e}_2,\vec{e}_3 \big\}$，机体坐标系的三个坐标轴记为$\big\{ \vec{b}_1,\vec{b}_2,\vec{b}_3 \big\}$。
+如\autoref{fig:modelaerialrobot}所示，定义$W$系原点在飞机初始点，为北-东-地坐标系，$B$系原点在飞行器质心，$x$轴指向机头、$y$轴指向右侧，$z$轴指向下方。将世界坐标系的三个坐标轴记为$\big\{ \vec{e}_1,\vec{e}_2,\vec{e}_3 \big\}$，机体坐标系的三个坐标轴记为$\big\{ \vec{b}_1,\vec{b}_2,\vec{b}_3 \big\}$。
 接着，再定义一个坐标系：
-其坐标原点位于飞行器质心，z轴轴垂直于地面并指向地心，x轴与机体系$\vec{b}_1$轴在水平面内的投影重合，y轴与机体系$\vec{b}_2$轴在水平面内的投影重合。此坐标系记位$bodyheading$坐标系。
+其坐标原点位于飞行器质心，$z$轴轴垂直于地面并指向地心，$x$轴与机体系$\vec{b}_1$轴在水平面内的投影重合，$y$轴与机体系$\vec{b}_2$轴在水平面内的投影重合。此坐标系记位$bodyheading$坐标系。
 这样，飞行器的位置向量，速度向量，加速度向量，角速度向量就都有了可以表示的坐标系。
 使用上标的方式描述状态量所投影的坐标系，将世界坐标系和机体坐标系中的向量分别定义为$(\cdot)^w$和$(\cdot)^b$。
 用$p^w$、$v^w$、$a^w$分别表示世界坐标系中飞行器的位置、速度、加速度。
@@ -489,7 +498,7 @@ BMI088的加速度计量程最大是24g，陀螺仪的最大量程是2000°/s。
 	\item 偏航角$\psi$：机体轴在水平面上的投影与地轴之间的夹角，以机体右偏为正。
 	\item 横滚角$\phi$：飞机对称面绕机体轴转过的角度，右滚为正。
 \end{itemize}
-\begin{figure}[htbp]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=0.7\textwidth]{屏幕截图 2022-03-31 231147.png}
 	\bicaption{欧拉角示意图}{Schematic diagram of euler angle}
@@ -502,8 +511,8 @@ BMI088的加速度计量程最大是24g，陀螺仪的最大量程是2000°/s。
 因此，不需要在算法中使用欧拉角进行运算。
 接下来本文引入旋转矩阵。
 
-如\autoref{fig:modelaerialrobot}，可以用坐标系W的坐标轴表示坐标系B的基。
-记坐标系B的基坐标为$x_{wb}, y_{wb}, z_{wb} \in \mathbb{R}^3$。
+如\autoref{fig:modelaerialrobot}，可以用坐标系$W$的坐标轴表示坐标系$B$的基。
+记坐标系$B$的基坐标为$x_{wb}, y_{wb}, z_{wb} \in \mathbb{R}^3$。
 定义旋转矩阵
 \begin{equation}\label{eq:rotationmatrixdefinition}
 	R_b^w = 
@@ -511,7 +520,7 @@ BMI088的加速度计量程最大是24g，陀螺仪的最大量程是2000°/s。
 		x_{wb} & y_{wb} & z_{wb}
 	\end{bmatrix}
 \end{equation}
-表示坐标系B相对于坐标系W的姿态。
+表示坐标系$B$相对于坐标系$W$的姿态。
 可以证明两个旋转矩阵的乘积还是旋转矩阵，所以全部旋转矩阵构成一个“群”，也就是SO(3)群，其定义为
 \begin{equation}\label{eq:so3}
 	SO(3) \triangleq \left\{ R \in \mathbb{R}^{3 \times 3} | det(R) = 1, R^T R = R R^T = I_3 \right\}
@@ -761,7 +770,7 @@ Lotters等人提出，利用静态加速度的大小必须等于重力的大小�
 %IMU校准流程如\autoref{fig:Flowchartofcalibration}。
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.36\textwidth]{屏幕截图 2022-05-07 001106.png}
+	\includegraphics[width=0.36\textwidth]{屏幕截图 2022-06-08 104040.png}
 	\bicaption{校准流程图}{Flow chart of calibration}
 	\label{fig:Flowchartofcalibration}
 \end{figure}
@@ -778,7 +787,7 @@ Lotters等人提出，利用静态加速度的大小必须等于重力的大小�
 	a^O=h(a^S,\theta^a) =T^a K^a (a^S + b^a)
 \end{equation}
 对于加速度计的误差模型，可以将噪声项忽略不计，这是因为在校准程序中，算法对每个静态区间的加速度信号求均值。
-记录N组稳定的姿态，在每个静态间隔内的一个时间窗口内平均加速度计读数可以提取M个加速度矢量$a^S_k$。
+记录$N$组稳定的姿态，在每个静态间隔内的一个时间窗口内平均加速度计读数可以提取$M$个加速度矢量$a^S_k$。
 定义加速度计校准参数的代价函数为
 \begin{equation}\label{eq:costacc}
 	L(\theta^a)=\sum_{k=1}^{M}(\left\|g\right\|-\left\|h(a^S,\theta^a)\right\|)^2
@@ -794,7 +803,7 @@ Lotters等人提出，利用静态加速度的大小必须等于重力的大小�
 \begin{equation}\label{eq:integration}
 	u_{g,k}=\phi(\omega^S_i , u_{a,k-1})
 \end{equation}
-其中，$\omega^S_i$是n个陀螺仪读数的序列，$u_{a,k-1}$是一个初始重力矢量，$u_{g,k}$是终点重力矢量，$\phi$是通过对角速度进行积分来计算最终位置的计算方法。
+其中，$\omega^S_i$是$n$个陀螺仪读数的序列，$u_{a,k-1}$是一个初始重力矢量，$u_{g,k}$是终点重力矢量，$\phi$是通过对角速度进行积分来计算最终位置的计算方法。
 在这种情况下，定义代价函数为
 \begin{equation}\label{eq:costgyro}
 	L(\theta^\omega)=\sum_{k=2}^{M}(u_{a,k}-u_{g,k})^2
@@ -828,7 +837,7 @@ Lotters等人提出，利用静态加速度的大小必须等于重力的大小�
 静态检测器由紫色方波表示，它的高电平是一个静态区间。
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=1.0\textwidth]{屏幕截图 2022-05-07 003714.png}
+	\includegraphics[width=1.0\textwidth]{屏幕截图 2022-04-03 103640.png}
 	\bicaption{静态检测示意图}{Diagram of static detection}
 	\label{fig:staticdetection}
 \end{figure}
@@ -853,7 +862,7 @@ RK4n积分算法为
 		k_4 &= f(t_k + \Delta t, q_k + \Delta t k_3)\vspace{1ex}
 	\end{aligned}
 \end{equation}
-最后，对于每一次迭代，还需要对k+1时刻四元数进行归一化处理
+最后，对于每一次迭代，还需要对$k+1$时刻四元数进行归一化处理
 \begin{equation}
 	q_{k+1} = \frac{q_{k+1}}{\left\|q_{k+1}\right\|}
 \end{equation}
@@ -868,11 +877,11 @@ RK4n积分算法为
 样本数量越少，计算的残差和越小。
 但在样本数量少的情况下，校准效果并不是最优的。
 基于残差和的计算方法需要比较多的样本点支撑。
-本文提出基于加速度计的静态误差作为衡量标准，计算最优k值。
+本文提出基于加速度计的静态误差作为衡量标准，计算最优$k$值。
 静态误差定义为加速度数据与重力做差的模的均值。
-通过记录每个k值对应的静态误差，最后取静态误差最小的阈值作为最优k值。
+通过记录每个$k$值对应的静态误差，最后取静态误差最小的阈值作为最优k值。
 
-选取最优k值之后，再次最小化\autoref{eq:costacc}，得出加速度计的校准参数，然后通过\autoref{eq:accerrormodel}得出加速度的参考值作为陀螺仪校准的参考，最后通过最小化\autoref{eq:costgyro}，求出陀螺仪的参数。
+选取最优$k$值之后，再次最小化\autoref{eq:costacc}，得出加速度计的校准参数，然后通过\autoref{eq:accerrormodel}得出加速度的参考值作为陀螺仪校准的参考，最后通过最小化\autoref{eq:costgyro}，求出陀螺仪的参数。
 以上算法的伪代码如下。
 \begin{algorithm}[H] 
 	\caption{IMU Calibration} 
@@ -900,6 +909,32 @@ RK4n积分算法为
 		\STATE $Params_{gyro} \gets $ optimize Eq.3.13 using $intervals_{opt},\omega^S_{biasfree}$ and $a^O$, averaging with $t_{wait}$. 
 	\end{algorithmic} 
 \end{algorithm}
+
+%\begin{algorithm}[H] 
+%	\caption{IMU 校准} 
+%	\label{alg1} 
+%	\begin{algorithmic}
+%		\REQUIRE $T_{init}$ , $t_{wait}$ ; $a^S$ 和 $\omega^S$ (加速度计和陀螺仪数据集).
+%		%		\rule[0.25\baselineskip]{\textwidth}{0.5pt} 
+%		\STATE $b^{\omega} \gets$ 计算$T_{init}$时间内陀螺仪数据的平均值; 
+%		\STATE $\omega^S_{biasfree} \gets \omega^S - b^{\omega}$; 
+%		\STATE $M_{init} \gets$ 空矩阵; 
+%		\STATE $\zeta_{init} \gets $ 通过公式(3.14), with $t_w = T_{init}$;
+%		\FOR{$i=1$ \TO $k$}
+%		\STATE $threshold \gets i*\zeta_{init}$;
+%		\STATE $intervals \gets$ static detector computed using $t_{wait}$ and $threshold$;
+%		\STATE $Params_{acc} \gets$ optimize Eq.3.11 using
+%		$intervals$ and $a_S$, averaging with $t_{wait}$; 
+%		\STATE $error \gets $ static error computed using $Params_{acc}$ and $a_S$;
+%		\STATE $M_{init} \gets [Params_{acc},threshold,intervals,error]$;
+%		\ENDFOR
+%		\STATE $index_{opt} \gets $ index of the minimum error in $M_{inf}$; 
+%		\STATE $Params_{acc} \gets $ from $M_{inf}$ using $index_{opt}$; 
+%		\STATE $intervals_{opt} \gets $ from $M_{inf}$ using $index_{opt}$; 
+%		\STATE $a^O \gets$ calibrate $a^S$ using $Params_{acc}$;
+%		\STATE $Params_{gyro} \gets $ optimize Eq.3.13 using $intervals_{opt},\omega^S_{biasfree}$ and $a^O$, averaging with $t_{wait}$. 
+%	\end{algorithmic} 
+%\end{algorithm}
 
 其中，输入参数有$T_{init}$，$t_{wait}$，$a^S$，$\omega^S$。
 $T_{init}$是初始静止时间，本文取10s。
@@ -1031,7 +1066,7 @@ $Params_{acc}$是加速度校准参数，$Params_{gyro}$是陀螺仪校准参数
 	\label{gyrocaliberr}
 	\begin{tabular}{ccc}
 		\toprule
-		状态 & 平均误差($deg$) & 最大误差($deg$) \\
+		状态 & 平均误差(度) & 最大误差(度) \\
 		\midrule
 		校准前 & 1.4431 & 1.5965 \\
 		校准后 & 0.1255 & 0.8970 \\
@@ -1045,7 +1080,7 @@ $Params_{acc}$是加速度校准参数，$Params_{gyro}$是陀螺仪校准参数
 (1)不管是分段积分还是全段积分，使用校准后的陀螺仪积分出来姿态更接近与真值。
 在全段积分中，由于陀螺仪零偏的存在，使用校准前的陀螺仪积分出来姿态存在漂移现象。
 
-(2)校准后的误差$<0.13deg$，传感器误差可以满足实际使用要求。
+(2)校准后的误差$<0.13$度，传感器误差可以满足实际使用要求。
 %\begin{table}[htbp]
 %	\bicaption{IMU参数}{IMU parameters}
 %	\label{IMUparameters}
@@ -1065,13 +1100,13 @@ $Params_{acc}$是加速度校准参数，$Params_{gyro}$是陀螺仪校准参数
 对于文献\parencite{tedaldi2014robust}提出的算法，本实验测试了其阈值计算的结果如\autoref{fig:res}所示。
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=1.0\textwidth]{res1.eps}
-	\bicaption{残差分析}{Residual analysis}
+	\includegraphics[width=1.0\textwidth]{res2.eps}
+	\bicaption{阈值计算对比}{Threshold calculation comparison}
 	\label{fig:res}
 \end{figure}
 
 Tedaldi计算最优阈值的原则是残差和最小，程序会选择残差和最小对应的阈值作为最优阈值。
-本文测试了当样本数为16时Tedaldi阈值估计算法的结果。
+本文测试了当样本数为16时Tedaldi和本文算法的结果。
 从\autoref{fig:res}可得出以下结论：
 
 (1)残差在$k=2$时是最小的，在$k=7$之后随着样本的增加逐渐减少。
@@ -1117,7 +1152,7 @@ Tedaldi计算最优阈值的原则是残差和最小，程序会选择残差和�
 %本文给出了各种环境下的实验结果，要求系统在一段较长的时间内无故障运行。
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.7\textwidth]{屏幕截图 2022-05-05 161436.png}
+	\includegraphics[width=0.55\textwidth]{屏幕截图 2022-06-08 110601.png}
 	\bicaption{状态估计框架图}{Diagram of state estimation}
 	\label{fig:stateestimation}
 \end{figure} 
@@ -1217,7 +1252,7 @@ $v_i$是可用的矢量测量。
 本文的融合算法总流程如\autoref{fig:Flowchartoffusionalgorithm}所示。
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth]{屏幕截图 2022-03-06 210135.png}
+	\includegraphics[width=0.68\textwidth]{屏幕截图 2022-06-08 113324.png}
 	\bicaption{融合算法流程图}{Flow chart of fusion algorithm}
 	\label{fig:Flowchartoffusionalgorithm}
 \end{figure}
@@ -1244,7 +1279,7 @@ $v_i$是可用的矢量测量。
 %为了方便说明，将所有的状态都计为$x_i$，测量值都计为$z_i$。
 \begin{figure}[htbp]
 	\centering
-	\includegraphics[width=1.0\textwidth]{屏幕截图 2022-05-07 170504.png}
+	\includegraphics[width=1.0\textwidth]{屏幕截图 2022-06-08 115635.png}
 	\bicaption{预测-修正-延时融合框架}{Prediction-correction-delay fusion framework}
 	\label{fig:Delayedmeasurementupdate}
 \end{figure} 
@@ -1327,8 +1362,8 @@ q^{Y} =
 由此可以看出，对完整的姿态四元数修正实际上是不必要的，偏航分量只对应于$q^{Y}$。
 可以通过磁力计计算的偏航角只修正$q^{Y}$，然后通过\autoref{eq:decompose}叠加到完整的姿态四元数上。
 由于横滚角$\phi$、俯仰角$\theta$分量只存在于四元数$q^{RP}$，因此避免了磁场干扰对横滚角$\phi$、俯仰角$\theta$的影响。
-由于欧拉角定义的旋转顺序是ZYX，偏航分量四元数可以写成:
-\begin{equation}
+由于欧拉角定义的旋转顺序是ZYX，偏航分量四元数的定义如\autoref{eq:yawquat}所示：
+\begin{equation}\label{eq:yawquat}
 	q^{Y} = 
 	\begin{bmatrix}
 		cos(\frac{\hat{\psi}}{2}) \\
@@ -1447,7 +1482,7 @@ q^{Y} =
 		状态量 & 标准差 \\
 		\midrule
 		$\big\{ \sigma_{a_x},\sigma_{a_y} \big\}$ & $\big\{ 14.61, 15.28 \big\}$(cm/s) \\
-		$\sigma_{\psi}$ & $0.23$(deg)   \\
+		$\sigma_{\psi}$ & $0.23$($^{\circ}$)   \\
 		$\big\{ \sigma_{p_x},\sigma_{p_y},\sigma_{p_z} \big\}$ & $\big\{ 3.21, 1.37, 1.44 \big\}$(cm)   \\
 		$\big\{ \sigma_{v_x},\sigma_{v_y},\sigma_{v_z} \big\}$ & $\big\{ 3.37, 3.31, 4.26 \big\}$(cm/s)   \\
 		\bottomrule
@@ -1603,7 +1638,7 @@ $\tau \in \mathbb{R}^3$，表示在机体坐标系下的螺旋桨产生的总力
 控制器总体框架如\autoref{fig:controllerstructure}所示。
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=1.0\textwidth]{屏幕截图 2022-05-05 000516.png}
+	\includegraphics[width=0.9\textwidth]{屏幕截图 2022-06-08 121234.png}
 	\bicaption{控制框架图}{Controller structure}
 	\label{fig:controllerstructure}
 \end{figure}
@@ -1753,14 +1788,14 @@ a_d^{bodyheading} = q_{\psi} \otimes a_d \otimes (q_{\psi})^{*}
 %控制量的输出波形是否平滑对控制效果
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.89\textwidth]{屏幕截图 2022-04-06 150427.png}
+	\includegraphics[width=1.0\textwidth]{rpcontrol.eps}
 	\bicaption{横滚与俯仰跟踪结果}{Roll and pitch tracking results}
 	\label{fig:Rptrackingresults}
 \end{figure}
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=1.0\textwidth]{屏幕截图 2022-04-06 151409.png}
+	\includegraphics[width=1.0\textwidth]{u.eps}
 	\bicaption{横滚与俯仰控制输出}{Roll and pitch control output}
 	\label{fig:Rpcontroloutput}
 \end{figure}
@@ -1774,39 +1809,53 @@ a_d^{bodyheading} = q_{\psi} \otimes a_d \otimes (q_{\psi})^{*}
 (3)整体控制输出较为平滑，可以满足实际飞行需求。
 
 \gdutsubsection{位置控制实验}{Position control experiment}
-本实验让飞行器定点悬停700s，记录机体位置的实际响应情况。
-实验中设置飞行器期望位置(x,y,z)为(2.07,11.15,-10.25)，设置期望速度为0，即定点悬停指令。
-分别绘制定点悬停过程中飞行器的实际位置(xyz)如\autoref{fig:xtrackingresults}、\autoref{fig:ytrackingresults}、\autoref{fig:ztrackingresults}所示，实际垂直速度变化情况如\autoref{fig:zveltrackingresults}所示。
+本实验让飞行器定点悬停180s，记录机体位置的实际响应情况。
+实验中设置飞行器期望位置$(x,y,z)$为(-1.60,-0.05,-0.47)，设置期望速度为0，即定点悬停指令。
+分别绘制定点悬停过程中飞行器的实际位置$x$和$y$如图\autoref{fig:xytrackingresults}所示，$z$方向和实际垂直速度变化情况如\autoref{fig:zdztrackingresults}所示。
 %以下是测试结果。
+%\begin{figure}[H]
+%	\centering
+%	\includegraphics[width=1.00\textwidth]{xcontrol.eps}
+%	\bicaption{x方向定位}{x tracking results}
+%	\label{fig:xtrackingresults}
+%\end{figure}
+%
+%\begin{figure}[H]
+%	\centering
+%	\includegraphics[width=1.00\textwidth]{ycontrol.eps}
+%	\bicaption{y方向定位}{y tracking results}
+%	\label{fig:ytrackingresults}
+%\end{figure}
+%
+%\begin{figure}[H]
+%	\centering
+%	\includegraphics[width=1.00\textwidth]{zcontrol.eps}
+%	\bicaption{z方向定位}{z tracking results}
+%	\label{fig:ztrackingresults}
+%\end{figure}
+%
+%\begin{figure}[H]
+%	\centering
+%	\includegraphics[width=1.00\textwidth]{dzcontrol.eps}
+%	\bicaption{垂直速度保持情况}{Vertical velocity tracking results}
+%	\label{fig:zveltrackingresults}
+%\end{figure}
+
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.97\textwidth]{屏幕截图 2022-04-10 192550.png}
-	\bicaption{x方向定位}{x tracking results}
-	\label{fig:xtrackingresults}
+	\includegraphics[width=1.00\textwidth]{xycontrol1.eps}
+	\bicaption{xy方向定位}{xy tracking results}
+	\label{fig:xytrackingresults}
 \end{figure}
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.97\textwidth]{屏幕截图 2022-04-10 193508.png}
-	\bicaption{y方向定位}{y tracking results}
-	\label{fig:ytrackingresults}
+	\includegraphics[width=1.00\textwidth]{zdzcontrol1.eps}
+	\bicaption{z方向定位以及垂直速度保持情况}{z and dz tracking results}
+	\label{fig:zdztrackingresults}
 \end{figure}
 
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=0.97\textwidth]{屏幕截图 2022-04-10 193919.png}
-	\bicaption{z方向定位}{z tracking results}
-	\label{fig:ztrackingresults}
-\end{figure}
-
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=0.97\textwidth]{屏幕截图 2022-04-10 194636.png}
-	\bicaption{垂直速度保持情况}{Vertical velocity tracking results}
-	\label{fig:zveltrackingresults}
-\end{figure}
-
-从\autoref{fig:xtrackingresults}、\autoref{fig:ytrackingresults}、\autoref{fig:ztrackingresults}和\autoref{fig:zveltrackingresults}中定性分析当前位置是否能稳定工作在期望位置以评估位置控制器的性能。
+从\autoref{fig:xytrackingresults}和\autoref{fig:zdztrackingresults}中定性分析当前位置是否能稳定工作在期望位置以评估位置控制器的性能。
 显然，实验过程中飞行器的实际三维位置在期望三维位置的小范围内波动，表明当前位置是能收敛到期望位置。
 
 最后，本实验通过采用实际位置平均值、实际位置误差均方差以及位置最大偏差三个指标来定量评估控制器的控制性能。
@@ -1820,10 +1869,10 @@ a_d^{bodyheading} = q_{\psi} \otimes a_d \otimes (q_{\psi})^{*}
 		\toprule
 		状态 & 给定位置($m$) & 实际位置平均值($m$) & 实际位置误差均方差($m$) & 位置最大偏差($m$)\\
 		\midrule
-		$x$ & 2.0700 & 2.0714 & 0.0600 & 0.2700 \\ 
-		$y$ & 11.1500 & 11.1398 & 0.0732 & 0.2200 \\
-		$z$ & -10.2500 & -10.2696 & 0.0620 & 0.2400 \\
-		$dz$ & 0.0000 & 0.0075 & 0.0296 & 0.1700 \\
+		$x$ & -1.6000 & -1.6014 & 0.0600 & 0.1200 \\ 
+		$y$ & -0.0500 & -0.0598 & 0.0732 & 0.1500 \\
+		$z$ & -0.4700 & -0.4796 & 0.0320 & 0.0600 \\
+		$dz$ & 0.0000 & 0.0075 & 0.0296 & 0.1000 \\
 		\bottomrule 
 	\end{tabular}
 \end{table}
@@ -1832,9 +1881,9 @@ a_d^{bodyheading} = q_{\psi} \otimes a_d \otimes (q_{\psi})^{*}
 
 (1)由于位置传感器是使用GPS，GPS反馈的位置数据本身有比较明显的波动，这是抛开控制器性能差异外影响定位精度的重要因素。
 
-(2)从X和Y方向的位置波动程度来看，定位波动小于0.2m。抛开传感器信息反馈波动外，从控制器的角度上来看，定位效果满足飞行需求。
+(2)从$x$和$y$方向的位置波动程度来看，定位波动小于0.2m。抛开传感器信息反馈波动外，从控制器的角度上来看，定位效果满足飞行需求。
 
-(3)从Z方向和垂向速度的跟踪情况来看，高度波动小于0.2m，高度控制能满足飞行需求。
+(3)从$z$方向和垂向速度的跟踪情况来看，高度波动小于0.2m，高度控制能满足飞行需求。
 
 \gdutsection{总结与讨论}{Summary and discussion}
 本章整合了现有的控制算法，完成了整个飞行控制系统的闭环，实现飞行器的稳定飞行，验证了本文提出的状态估计算法的有效性。
@@ -1880,28 +1929,28 @@ a_d^{bodyheading} = q_{\psi} \otimes a_d \otimes (q_{\psi})^{*}
 \gdutbacksection{申请发明专利}
 
 \begin{results}
-%  \item 鲁仁全, \textbf{邓正雄}, 徐雍, 林明, 饶红霞. 全方位移动侦查探测器、控制系统和控制方法. 发明专利申请号: 202011588192.4.
-  \item ***, \textbf{2111904069}, ***, ***, ***. 全方位移动侦查探测器、控制系统和控制方法. 发明专利申请号: 202011588192.4.
+  \item 鲁仁全, \textbf{邓正雄}, 徐雍, 林明, 饶红霞. 全方位移动侦查探测器、控制系统和控制方法. 发明专利申请号: 202011588192.4.
+%  \item ***, \textbf{2111904069}, ***, ***, ***. 全方位移动侦查探测器、控制系统和控制方法. 发明专利申请号: 202011588192.4.
 \end{results}
 
 \gdutstatement
 
 \gdutchapter{致谢}{Acknowlegements}
-%没有大家的支持，这篇论文是不可能完成的。
-%首先，我要感谢我的导师鲁仁全教授和徐雍教授，感谢他们在我在广工的研究生学习过程中给予我的支持和指导。
-%此外，我要感谢智能决策与协同控制研究所的同学和老师，以及海雀团队的师兄师弟们。
-%我们三年来进行了许多很棒的技术讨论和有趣的时光。
-%还有，我要感谢柯金铭、邝野和滕达，感谢他们三年来对我生活上和学习上的帮助。
-%特别地，我要感谢刘畅、邓华银、陈梓杰和凌胜财，感谢他们对我在撰写毕业论文上的帮助。
-%我感谢我的父母，感谢多年来他们给予我的爱和支持。
-
 没有大家的支持，这篇论文是不可能完成的。
-首先，我要感谢我的导师***和***，感谢他们在我在广工的研究生学习过程中给予我的支持和指导。
+首先，我要感谢我的导师鲁仁全教授和徐雍教授，感谢他们在我在广工的研究生学习过程中给予我的支持和指导。
 此外，我要感谢智能决策与协同控制研究所的同学和老师，以及海雀团队的师兄师弟们。
 我们三年来进行了许多很棒的技术讨论和有趣的时光。
-还有，我要感谢***、***和***，感谢他们三年来对我生活上和学习上的帮助。
-特别地，我要感谢***、***、***和***，感谢他们对我在撰写毕业论文上的帮助。
+还有，我要感谢柯金铭、邝野和滕达，感谢他们三年来对我生活上和学习上的帮助。
+特别地，我要感谢刘畅、邓华银、陈梓杰和凌胜财，感谢他们对我在撰写毕业论文上的帮助。
 我感谢我的父母，感谢多年来他们给予我的爱和支持。
+
+%没有大家的支持，这篇论文是不可能完成的。
+%首先，我要感谢我的导师***和***，感谢他们在我在广工的研究生学习过程中给予我的支持和指导。
+%此外，我要感谢智能决策与协同控制研究所的同学和老师，以及海雀团队的师兄师弟们。
+%我们三年来进行了许多很棒的技术讨论和有趣的时光。
+%还有，我要感谢***、***和***，感谢他们三年来对我生活上和学习上的帮助。
+%特别地，我要感谢***、***、***和***，感谢他们对我在撰写毕业论文上的帮助。
+%我感谢我的父母，感谢多年来他们给予我的爱和支持。
 %\gdutappendix
 %
 %\gdutchapter{附录标题}{The appendix title}
